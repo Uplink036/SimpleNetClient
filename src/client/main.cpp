@@ -12,7 +12,10 @@
 #include <calcLib.h>
 
 int main(int argc, char *argv[]){
-
+  if (argc != 2)
+  {
+    printf("Unexpected amount of inputs, expected [<PROGRAM>] [<DNS|IPv4|IPv6>:<PORT>], got %d arguments", argc);
+  }
   /*
     Read first input, assumes <ip>:<port> syntax, convert into one string (Desthost) and one integer (port). 
      Atm, works only on dotted notation, i.e. IPv4 and DNS. IPv6 does not work if its using ':'. 
