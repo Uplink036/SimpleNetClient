@@ -28,7 +28,24 @@ int main(int argc, char *argv[]){
     Read first input, assumes <ip>:<port> syntax, convert into one string (Desthost) and one integer (port). 
      Atm, works only on dotted notation, i.e. IPv4 and DNS. IPv6 does not work if its using ':'. 
   */
-  char delim[]=":";
+  char* delim = (char*)malloc(sizeof(char));
+  int ip_index = 0;
+  char* ip = argv[1];
+  while (ip[ip_index] != 0)
+  {
+    if (ip[ip_index] == '.')
+    {
+      delim[0] = '.';
+      break;
+    }
+    else if (ip[ip_index] == ':')
+    {
+      delim[0]= ':';
+      break;
+    }
+    ip_index++;
+  }
+
   char *Desthost=strtok(argv[1],delim);
   char *Destport=strtok(NULL,delim);
   // *Desthost now points to a sting holding whatever came before the delimiter, ':'.
