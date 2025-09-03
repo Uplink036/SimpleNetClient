@@ -12,9 +12,17 @@
 #include <calcLib.h>
 
 int main(int argc, char *argv[]){
+  for (int i = 0; i < argc; i++)
+  {
+    printf("%s", argv[i]);
+  }
+  printf("\n");
+
   if (argc != 2)
   {
-    printf("Unexpected amount of inputs, expected [<PROGRAM>] [<DNS|IPv4|IPv6>:<PORT>], got %d arguments", argc);
+    printf("Unexpected amount of inputs, expected [<PROGRAM>] [<DNS|IPv4|IPv6>:<PORT>], got %d arguments\n", argc);
+    fflush(stdout);
+    exit(-1);
   }
   /*
     Read first input, assumes <ip>:<port> syntax, convert into one string (Desthost) and one integer (port). 
