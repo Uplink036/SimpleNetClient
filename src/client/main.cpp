@@ -31,25 +31,10 @@ int main(int argc, char *argv[]){
 
   char* destination;
   char* destinationPort; 
-  char delim = ':';
-  int i;
-  int inputLen = strlen(argv[1]);
-  for (i = inputLen; i > 0; i--)
+  int returnValue = split_ip_port_from_string(argv[1], &destination, &destinationPort);
+  if (returnValue < 0)
   {
-    if (argv[1][i] == delim)
-    {
-      int destinationLength = i;
-      int portLength = inputLen - (i);
-      destination = (char*)malloc(sizeof(destinationLength)*sizeof(*destination));
-      strncpy(destination, argv[1], destinationLength);
-      destinationPort = (char*)malloc(sizeof(portLength)*sizeof(*destinationPort));
-      strncpy(destinationPort, argv[1]+i+1, portLength);
-      break;
-    }
-  }
-  if (i == 0)
-  {
-    printf("Did not find delim, exiting...");
+    printf("Did not find viable IP and PORT, exiting...\n");
     exit(-1);
   }
 
@@ -61,7 +46,7 @@ int main(int argc, char *argv[]){
   addrinfo* results;
 
   printf("Host %s, and port %s.\n",destination, destinationPort);
-  int returnValue = getaddrinfo(
+  returnValue = getaddrinfo(
     destination,
     destinationPort,
     &hints,
