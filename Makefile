@@ -1,36 +1,47 @@
-CC_FLAGS= -Wall -I. -Ilib
+CC_FLAGS= -Wall -I. -Ilib -g
+CXXFLAGS= -Wall -I. -Ilib -g
 LD_FLAGS= -Wall -L./ 
 
+SRC_DIR     = ./src
+BUILD_DIR   = ./build
+
+CLIENT_DIR     = $(SRC_DIR)/client
+CLIENT_OBJ   = c_main.o c_ip.o
+CLIENT_OBJS = $(patsubst %,$(BUILD_DIR)/%,$(CLIENT_OBJ))
+
+SERVER_DIR     = $(SRC_DIR)/server
+SERVER_OBJ   = s_main.o
+SERVER_OBJS = $(patsubst %,$(BUILD_DIR)/%,$(SERVER_OBJ))
 
 all: libcalc test client server ## Compile everything
 
-servermain.o: src/server/main.cpp
-	$(CXX)  $(CC_FLAGS) $(CFLAGS) -c src/server/main.cpp -o serverMain.o
+$(BUILD_DIR)/s_%.o: $(SERVER_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -o $@ -c $^
 
-clientmain.o: src/client/main.cpp
-	$(CXX) $(CC_FLAGS) $(CFLAGS) -c src/client/main.cpp -o clientMain.o
+$(BUILD_DIR)/c_%.o : $(CLIENT_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -o $@ -c $^
 
 main.o: lib/main.cpp
-	$(CXX) $(CC_FLAGS) $(CFLAGS) -c lib/main.cpp 
-
+	$(CXX) $(CC_FLAGS) $(CFLAGS) -c lib/main.cpp -o $(BUILD_DIR)/main.o
 
 test: main.o calcLib.o ## Compile a test file of calculations
-	$(CXX) $(LD_FLAGS) -o test.out main.o -lcalc
+	$(CXX) $(LD_FLAGS) -o test.out $(BUILD_DIR)/main.o -lcalc
 
-client: clientmain.o calcLib.o ## Compile the client file
-	$(CXX) $(LD_FLAGS) -o client.out clientMain.o -lcalc
+client: $(CLIENT_OBJS) calcLib.o ## Compile the client file
+	$(CXX) $(LD_FLAGS) -o client.out $(BUILD_DIR)/c_*.o -lcalc
 
-server: servermain.o calcLib.o ## Compile the server file
-	$(CXX) $(LD_FLAGS) -o server.out serverMain.o -lcalc
+server: $(SERVER_OBJS) calcLib.o ## Compile the server file
+	$(CXX) $(LD_FLAGS) -o server.out $(BUILD_DIR)/s_*.o -lcalc
 
 calcLib.o: lib/calcLib.c lib/calcLib.h
-	gcc -Wall -fPIC -c lib/calcLib.c -o calcLib.o
+	gcc -Wall -fPIC -c lib/calcLib.c -o $(BUILD_DIR)/calcLib.o
 
 libcalc: calcLib.o ## Generate the calc lib file (is needed)
 	ar -rc libcalc.a -o calcLib.o
 
 clean: ## Clean generated files
-	rm *.o *.a *.out
+	rm -r *.o 
+	rm *.a *.out
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
