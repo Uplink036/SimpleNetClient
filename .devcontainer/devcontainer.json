@@ -3,7 +3,14 @@
 {
 	"name": "Ubuntu",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu-20.04"
+	"image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu-20.04",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools"
+			]
+		}
+	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
