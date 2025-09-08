@@ -5,30 +5,25 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-/* You will to add includes here */
-
-// Enable if you want debugging to be printed, see examble below.
-// Alternative, pass CFLAGS=-DDEBUG to make, make CFLAGS=-DDEBUG
-#define DEBUG 1
+#include "ip.h"
+#include "debug.h"
+#include "calcLib.h"
 
 
-// Included to get the support library
-#include <calcLib.h>
-
-int main(int argc, char *argv[]){
-  for (int i = 0; i < argc; i++)
-  {
-    printf("%s", argv[i]);
-  }
-  printf("\n");
-
+void validate_input_args(int argc, char *argv[])
+{
+  DEBUG_FUNCTION("client::main::validate_input_args(&d, ...)\n", argc)
   if (argc != 2)
   {
     printf("Unexpected amount of inputs, expected [<PROGRAM>] [<DNS|IPv4|IPv6>:<PORT>], got %d arguments\n", argc);
     fflush(stdout);
     exit(-1);
   }
+}
 
+int main(int argc, char *argv[]){
+  validate_input_args(argc, argv);
+  
   char* destination;
   char* destinationPort; 
   int returnValue = split_ip_port_from_string(argv[1], &destination, &destinationPort);
