@@ -2,8 +2,9 @@ CC_FLAGS= -Wall -I. -Isrc/lib -Isrc/client -Isrc/server -g
 CXXFLAGS= -Wall -I. -Isrc/lib -Isrc/client -Isrc/server -g
 LD_FLAGS= -Wall -L./ 
 
-SRC_DIR     = ./src
-BUILD_DIR   = ./build
+SRC_DIR       = ./src
+TEST_DIR 	  = ./tests
+BUILD_DIR     = ./build
 
 CLIENT_DIR    = $(SRC_DIR)/client
 CLIENT_OBJ    = c_main.o c_ip.o
@@ -15,7 +16,7 @@ SERVER_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(SERVER_OBJ))
 
 LIBRARY_DIR   = $(SRC_DIR)/lib
 
-all: libcalc test client server ## Compile everything
+all: libcalc manual_test client server ## Compile everything
 
 $(BUILD_DIR)/s_%.o: $(SERVER_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -o $@ -c $^
@@ -26,7 +27,14 @@ $(BUILD_DIR)/c_%.o : $(CLIENT_DIR)/%.cpp
 main.o: lib/main.cpp
 	$(CXX) $(CC_FLAGS) $(CFLAGS) -c lib/main.cpp -o $(BUILD_DIR)/main.o
 
-test: main.o calcLib.o ## Compile a test file of calculations
+tests_client:
+	$(CXX) $(CC_FLAGS) -o $(BUILD_DIR)/t_client.o -c $(TEST_DIR)/client/*.cpp 
+
+tests: client tests_client
+	rm $(BUILD_DIR)/c_main.o
+	$(CXX) $(LD_FLAGS) -o test_client.out $(BUILD_DIR)/c_*.o $(BUILD_DIR)/t_client.o -lcalc
+
+manual_test: main.o calcLib.o ## Compile a test file of calculations
 	$(CXX) $(LD_FLAGS) -o test.out $(BUILD_DIR)/main.o -lcalc
 
 client: $(CLIENT_OBJS) calcLib.o ## Compile the client file
