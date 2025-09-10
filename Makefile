@@ -1,17 +1,19 @@
-CC_FLAGS= -Wall -I. -Ilib -g
-CXXFLAGS= -Wall -I. -Ilib -g
+CC_FLAGS= -Wall -I. -Isrc/lib -Isrc/client -Isrc/server -g
+CXXFLAGS= -Wall -I. -Isrc/lib -Isrc/client -Isrc/server -g
 LD_FLAGS= -Wall -L./ 
 
 SRC_DIR     = ./src
 BUILD_DIR   = ./build
 
-CLIENT_DIR     = $(SRC_DIR)/client
-CLIENT_OBJ   = c_main.o c_ip.o
-CLIENT_OBJS = $(patsubst %,$(BUILD_DIR)/%,$(CLIENT_OBJ))
+CLIENT_DIR    = $(SRC_DIR)/client
+CLIENT_OBJ    = c_main.o c_ip.o
+CLIENT_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(CLIENT_OBJ))
 
-SERVER_DIR     = $(SRC_DIR)/server
-SERVER_OBJ   = s_main.o
-SERVER_OBJS = $(patsubst %,$(BUILD_DIR)/%,$(SERVER_OBJ))
+SERVER_DIR    = $(SRC_DIR)/server
+SERVER_OBJ    = s_main.o
+SERVER_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(SERVER_OBJ))
+
+LIBRARY_DIR   = $(SRC_DIR)/lib
 
 all: libcalc test client server ## Compile everything
 
@@ -33,11 +35,11 @@ client: $(CLIENT_OBJS) calcLib.o ## Compile the client file
 server: $(SERVER_OBJS) calcLib.o ## Compile the server file
 	$(CXX) $(LD_FLAGS) -o server.out $(BUILD_DIR)/s_*.o -lcalc
 
-calcLib.o: lib/calcLib.c lib/calcLib.h
-	gcc -Wall -fPIC -c lib/calcLib.c -o $(BUILD_DIR)/calcLib.o
+calcLib.o: $(LIBRARY_DIR)/calcLib.c $(LIBRARY_DIR)/calcLib.h
+	gcc -Wall -fPIC -c $(LIBRARY_DIR)/calcLib.c -o $(BUILD_DIR)/calcLib.o
 
 libcalc: calcLib.o ## Generate the calc lib file (is needed)
-	ar -rc libcalc.a -o calcLib.o
+	ar -rc libcalc.a -o $(BUILD_DIR)/calcLib.o
 
 clean: ## Clean generated files
 	rm -r *.o 
