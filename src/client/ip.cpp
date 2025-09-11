@@ -1,8 +1,31 @@
 #include "ip.h"
 
-int split_ip_port_from_string(char* string, char**ip, char** port)
+bool validPORT(char* port)
 {
-    DEBUG_FUNCTION("client::ip::split_ip_port_from_string(%s, %p, %p)\n", string, ip, port)
+    DEBUG_FUNCTION("client::ip::validPORT(%s)\n",port)
+    int portLength = strlen(port);
+    if (!(portLength > 0))
+        return false;
+    for (int i = 0; i < portLength; i++)
+    {
+        char c = port[i];
+        if (!(c >= '0' && c <='9'))
+            return false;
+    }
+    return true;
+}
+
+bool validIP(char* ip)
+{
+    DEBUG_FUNCTION("client::ip::validIP(%s)\n", ip)
+    if (!(strlen(ip) > 0))
+        return false;
+    return true;
+}
+
+int splitIPPortFromString(char* string, char**ip, char** port)
+{
+    DEBUG_FUNCTION("client::ip::splitIPPortFromString(%s, %p, %p)\n", string, ip, port)
     char delim = ':';
     int i;
     int inputLen = strlen(string);
@@ -21,5 +44,7 @@ int split_ip_port_from_string(char* string, char**ip, char** port)
     }
     if (i == 0)
         return -1;
+    if (!(validPORT(*port) && validIP(*ip)))
+        return -2;
     return 0;
 }
