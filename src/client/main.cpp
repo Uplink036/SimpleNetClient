@@ -7,7 +7,7 @@
 #include <netdb.h>
 #include "ip.h"
 #include "debug.h"
-#include "calcLib.h"
+#include "calc.h"
 
 
 void validate_input_args(int argc, char *argv[])

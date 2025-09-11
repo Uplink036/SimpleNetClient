@@ -8,11 +8,11 @@
    This is a C lib, and will be built as such.
    
 */ 
-#include "calcLib.h"
+#include "calc.h"
 
 
 /* array of char* that points to char arrays.  */ 
-char *arith[]={"add","div","mul","sub","fadd","fdiv","fmul","fsub"};
+const char *arith[]={"add","div","mul","sub","fadd","fdiv","fmul","fsub"};
 
 /* Used for random number */
 time_t myData_seedValue;
@@ -38,7 +38,7 @@ int initCalcLib_seed(unsigned int seed){
   return(0);
 }
   
-char *randomType(void){
+const char *randomType(void){
   int Listitems=sizeof(arith)/(sizeof(char*)); 
   /* Figure out HOW many entries there are in the list.
      First we get the total size that the array of pointers use, sizeof(arith). Then we divide with 
