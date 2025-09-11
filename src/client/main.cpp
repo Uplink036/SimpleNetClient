@@ -26,7 +26,7 @@ int main(int argc, char *argv[]){
   
   char* destination;
   char* destinationPort; 
-  int returnValue = split_ip_port_from_string(argv[1], &destination, &destinationPort);
+  int returnValue = splitIPPortFromString(argv[1], &destination, &destinationPort);
   if (returnValue < 0)
   {
     printf("Did not find viable IP and PORT, exiting...\n");
