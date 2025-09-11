@@ -15,9 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Setup BOOST
-      run: |
-        apt update
-        apt install libboost-all-dev
+      run: sudo apt install -y libboost-all-dev
     - name: compile tests
       run: make tests
     - name: run tests
