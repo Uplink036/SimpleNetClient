@@ -31,7 +31,7 @@ void validate_input_args(int argc, char *argv[])
   }
 }
 
-bool populateTCPHint(addrinfo* hints)
+void populateTCPHint(addrinfo* hints)
 {
   memset(hints, 0, sizeof(addrinfo));
   hints->ai_family = AF_UNSPEC;
@@ -39,81 +39,92 @@ bool populateTCPHint(addrinfo* hints)
   hints->ai_socktype = SOCK_STREAM;
 }
 
-int main(int argc, char *argv[]){
-  validate_input_args(argc, argv);
-
+int bindPort(char* desiredPort, addrinfo** selectedIP)
+{
   addrinfo hints;
-  addrinfo* serverResults;
+  addrinfo* avaliableIPs;
   int returnValue;
   
   populateTCPHint(&hints);
-  int returnValue = getaddrinfo(NULL, argv[1], &hints, &serverResults);
+  returnValue = getaddrinfo(NULL, desiredPort, &hints, &avaliableIPs);
 	IF_NOT_ZERO(returnValue)
   {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(returnValue));
-		return 1;
+		return -1;
 	}
 
-  int sockfd, new_fd;
-  addrinfo *p;
-	for(p = serverResults; p != NULL; p = p->ai_next)
+  int socket_fd;
+  addrinfo* p;
+	for(p = avaliableIPs; p != NULL; p = p->ai_next)
   {
-    IF_NOT_ZERO(socket(p->ai_family, p->ai_socktype, p->ai_protocol))
+    socket_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+    IF_NEGATIVE(socket_fd)
       {
-        perror("server: socket");
+        perror("server: socket\n");
         continue;
       }
       
     const int yes=1;
-		IF_NOT_ZERO(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)))
+		IF_NOT_ZERO(setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)))
     {
       perror("setsockopt");
-			exit(1);
+			return -1;
 		}
 
-		IF_NOT_ZERO(bind(sockfd, p->ai_addr, p->ai_addrlen)) 
+		IF_NEGATIVE(bind(socket_fd, p->ai_addr, p->ai_addrlen)) 
     {
-			close(sockfd);
+			close(socket_fd);
 			perror("server: bind");
 			continue;
 		}
 		break;
 	}
-	freeaddrinfo(serverResults); // all done with this structure
-
+	freeaddrinfo(avaliableIPs);
+  *selectedIP = p;
 	IF_NULL(p)  {
 		fprintf(stderr, "server: failed to bind\n");
-		exit(1);
+		return -1;
 	}
 
-	IF_NOT_ZERO(listen(sockfd, BACKLOG)) {
+	IF_NEGATIVE(listen(socket_fd, BACKLOG)) {
 		perror("listen");
-		exit(1);
+		return -1;
 	}  
+  return socket_fd;
+}
+
+int main(int argc, char *argv[]){
+  validate_input_args(argc, argv);
+
+  int socket_fd;
+  addrinfo* serverIP;
+  socket_fd = bindPort(argv[1], &serverIP);
+  IF_NEGATIVE(socket_fd)
+  {
+    fprintf(stderr, "Could not bind to specified port\n");
+    return socket_fd;
+  }
 
   printf("server: waiting for connections...\n");
 	char msg[1500];
 	int MAXSZ=sizeof(msg)-1;
 	int childCnt=0;
 	int readSize;
-	char command[10];
-	char optionstring[128];
-	int optionint1;
-	int optionint2;
 	
   socklen_t socket_in_size;
   struct sockaddr_storage their_addr;
   char client[INET6_ADDRSTRLEN];
+  int new_fd;
 	while(true) {
     socket_in_size = sizeof(their_addr);
-    new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &socket_in_size);
+    new_fd = accept(socket_fd, (struct sockaddr *)&their_addr, &socket_in_size);
     IF_NEGATIVE(new_fd) 
     {
       perror("accept");
       continue;
     }
 
-    getnameinfo(p->ai_addr, p->ai_addrlen, client, sizeof(client),
+    getnameinfo(serverIP->ai_addr, serverIP->ai_addrlen, client, sizeof(client),
                               nullptr, 0, 0);
     printf("server: Connection %d from %s\n",childCnt, client);
     printf("server: Sending welcome \n");
