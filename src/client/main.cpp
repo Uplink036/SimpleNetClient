@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -51,7 +52,20 @@ int main(int argc, char *argv[]){
   {
     return returnValue;
   }
+
+  struct addrinfo *rp;
+  int socketfd;
+  for (rp = results; rp != NULL; rp = rp->ai_next) {
+    socketfd = socket(rp->ai_family, rp->ai_socktype,
+                rp->ai_protocol);
+    if (socketfd == -1)
+        continue;
+
+    if (connect(socketfd, rp->ai_addr, rp->ai_addrlen) == 0)
+        break;
+  }
   freeaddrinfo(results);
+  close(socketfd);
   free(destination);
   free(destinationPort);
   return 0;
