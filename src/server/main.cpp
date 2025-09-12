@@ -10,6 +10,7 @@
 #include "ip.h"
 #include "debug.h"
 #include "calc.h"
+#include "macros.h"
 
 #define BACKLOG 2	 // how many pending connections queue will hold
 
@@ -30,58 +31,66 @@ void validate_input_args(int argc, char *argv[])
   }
 }
 
+bool populateTCPHint(addrinfo* hints)
+{
+  memset(hints, 0, sizeof(addrinfo));
+  hints->ai_family = AF_UNSPEC;
+  hints->ai_protocol = IPPROTO_TCP;
+  hints->ai_socktype = SOCK_STREAM;
+}
+
 int main(int argc, char *argv[]){
   validate_input_args(argc, argv);
-  
-  addrinfo hints;
-  memset(&hints, 0, sizeof(addrinfo));
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_protocol = IPPROTO_TCP;
-  hints.ai_socktype = SOCK_STREAM;
-  addrinfo* serverResults;
 
-  int rv;
-	if ((rv = getaddrinfo(NULL, argv[1], &hints, &serverResults)) != 0) {
-		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+  addrinfo hints;
+  addrinfo* serverResults;
+  int returnValue;
+  
+  populateTCPHint(&hints);
+  int returnValue = getaddrinfo(NULL, argv[1], &hints, &serverResults);
+	IF_NOT_ZERO(returnValue)
+  {
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(returnValue));
 		return 1;
 	}
+
   int sockfd, new_fd;
   addrinfo *p;
 	for(p = serverResults; p != NULL; p = p->ai_next)
   {
-    if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) 
+    IF_NOT_ZERO(socket(p->ai_family, p->ai_socktype, p->ai_protocol))
       {
         perror("server: socket");
         continue;
       }
       
     const int yes=1;
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) 
+		IF_NOT_ZERO(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)))
     {
       perror("setsockopt");
 			exit(1);
 		}
 
-		if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) 
+		IF_NOT_ZERO(bind(sockfd, p->ai_addr, p->ai_addrlen)) 
     {
 			close(sockfd);
 			perror("server: bind");
 			continue;
 		}
-
 		break;
 	}
 	freeaddrinfo(serverResults); // all done with this structure
 
-	if (p == NULL)  {
+	IF_NULL(p)  {
 		fprintf(stderr, "server: failed to bind\n");
 		exit(1);
 	}
 
-	if (listen(sockfd, BACKLOG) == -1) {
+	IF_NOT_ZERO(listen(sockfd, BACKLOG)) {
 		perror("listen");
 		exit(1);
 	}  
+
   printf("server: waiting for connections...\n");
 	char msg[1500];
 	int MAXSZ=sizeof(msg)-1;
@@ -98,25 +107,28 @@ int main(int argc, char *argv[]){
 	while(true) {
     socket_in_size = sizeof(their_addr);
     new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &socket_in_size);
-    if (new_fd == -1) {
+    IF_NEGATIVE(new_fd) 
+    {
       perror("accept");
       continue;
     }
+
     getnameinfo(p->ai_addr, p->ai_addrlen, client, sizeof(client),
                               nullptr, 0, 0);
     printf("server: Connection %d from %s\n",childCnt, client);
-    
     printf("server: Sending welcome \n");
     struct sockaddr_in *local_sin=(struct sockaddr_in*)&their_addr;
-    if (send(new_fd, "Hello, world!", 13, 0) == -1){
+    IF_NEGATIVE(send(new_fd, "Hello, world!", 13, 0)){
       perror("send");
       close(new_fd);
       continue;
     }
+
     while(true){
       readSize=recv(new_fd,&msg,MAXSZ,0);
       printf("Child[%d] (%s:%d): recv(%d) .\n", childCnt,client,ntohs(local_sin->sin_port),readSize);
-      if(readSize==0){
+      IF_ZERO(readSize)
+      {
         printf("Child [%d] died.\n",childCnt);
         close(new_fd);
         break;
