@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -7,12 +8,12 @@
 #include <netdb.h>
 #include "ip.h"
 #include "debug.h"
-#include "calcLib.h"
+#include "calc.h"
 
 
 void validate_input_args(int argc, char *argv[])
 {
-  DEBUG_FUNCTION("client::main::validate_input_args(&d, ...)\n", argc)
+  DEBUG_FUNCTION("client::main::validate_input_args(&d, ...)\n", argc);
   if (argc != 2)
   {
     printf("Unexpected amount of inputs, expected [<PROGRAM>] [<DNS|IPv4|IPv6>:<PORT>], got %d arguments\n", argc);
@@ -51,7 +52,20 @@ int main(int argc, char *argv[]){
   {
     return returnValue;
   }
+
+  struct addrinfo *rp;
+  int socketfd;
+  for (rp = results; rp != NULL; rp = rp->ai_next) {
+    socketfd = socket(rp->ai_family, rp->ai_socktype,
+                rp->ai_protocol);
+    if (socketfd == -1)
+        continue;
+
+    if (connect(socketfd, rp->ai_addr, rp->ai_addrlen) == 0)
+        break;
+  }
   freeaddrinfo(results);
+  close(socketfd);
   free(destination);
   free(destinationPort);
   return 0;

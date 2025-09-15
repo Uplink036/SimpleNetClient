@@ -1,13 +1,13 @@
-CC_FLAGS= -Wall -I. -Isrc/lib -Isrc/client -Isrc/server -g
-CXXFLAGS= -Wall -I. -Isrc/lib -Isrc/client -Isrc/server -g
-LD_FLAGS= -Wall -L./ 
+CXXFLAGS      = -Wall -Isrc -Isrc/lib -Isrc/client -Isrc/server -g
+LIBFLAGS      = -fPIC $(CXXFLAGS)
+LD_FLAGS      = -Wall -L./ 
 
 SRC_DIR       = ./src
 TEST_DIR 	  = ./tests
 BUILD_DIR     = ./build
 
 CLIENT_DIR    = $(SRC_DIR)/client
-CLIENT_OBJ    = c_main.o c_ip.o
+CLIENT_OBJ    = c_main.o
 CLIENT_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(CLIENT_OBJ))
 
 SERVER_DIR    = $(SRC_DIR)/server
@@ -15,6 +15,8 @@ SERVER_OBJ    = s_main.o
 SERVER_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(SERVER_OBJ))
 
 LIBRARY_DIR   = $(SRC_DIR)/lib
+LIBRARY_OBJ    = l_ip.o l_calc.o
+LIBRARY_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(LIBRARY_OBJ))
 
 all: libcalc manual_test client server ## Compile everything
 
@@ -24,30 +26,32 @@ $(BUILD_DIR)/s_%.o: $(SERVER_DIR)/%.cpp
 $(BUILD_DIR)/c_%.o : $(CLIENT_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -o $@ -c $^
 
+$(BUILD_DIR)/l_%.o : $(LIBRARY_DIR)/%.cpp
+	$(CXX) $(LIBFLAGS) -o $@ -c $^
+
 main.o: lib/main.cpp
-	$(CXX) $(CC_FLAGS) $(CFLAGS) -c lib/main.cpp -o $(BUILD_DIR)/main.o
+	$(CXX) $(CXXFLAGS) $(CFLAGS) -c lib/main.cpp -o $(BUILD_DIR)/main.o
 
 tests_client:
-	$(CXX) $(CC_FLAGS) -o $(BUILD_DIR)/t_client.o -c $(TEST_DIR)/client/*.cpp 
+	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_client.o -c $(TEST_DIR)/client/*.cpp 
 
 tests: client tests_client
 	rm $(BUILD_DIR)/c_main.o
-	$(CXX) $(LD_FLAGS) -o test_client.out $(BUILD_DIR)/c_*.o $(BUILD_DIR)/t_client.o -lcalc
+	$(CXX) $(LD_FLAGS) -o test_client.out $(BUILD_DIR)/c_*.o $(BUILD_DIR)/t_client.o -lcommon
 
 manual_test: main.o calcLib.o ## Compile a test file of calculations
-	$(CXX) $(LD_FLAGS) -o test.out $(BUILD_DIR)/main.o -lcalc
+	$(CXX) $(LD_FLAGS) -o test.out $(BUILD_DIR)/main.o -lcommon
 
-client: $(CLIENT_OBJS) calcLib.o ## Compile the client file
-	$(CXX) $(LD_FLAGS) -o client.out $(BUILD_DIR)/c_*.o -lcalc
+client: $(CLIENT_OBJS) lib ## Compile the client file
+	$(CXX) $(LD_FLAGS) -o client.out $(BUILD_DIR)/c_*.o -lcommon
 
-server: $(SERVER_OBJS) calcLib.o ## Compile the server file
-	$(CXX) $(LD_FLAGS) -o server.out $(BUILD_DIR)/s_*.o -lcalc
+server: $(SERVER_OBJS) lib ## Compile the server file
+	$(CXX) $(LD_FLAGS) -o server.out $(BUILD_DIR)/s_*.o -lcommon
 
-calcLib.o: $(LIBRARY_DIR)/calcLib.c $(LIBRARY_DIR)/calcLib.h
-	gcc -Wall -fPIC -c $(LIBRARY_DIR)/calcLib.c -o $(BUILD_DIR)/calcLib.o
+lib: $(LIBRARY_OBJS) ## Generate the calc lib file (is needed)
+	ar -rc libcommon.a -o $(BUILD_DIR)/l_*.o
 
-libcalc: calcLib.o ## Generate the calc lib file (is needed)
-	ar -rc libcalc.a -o $(BUILD_DIR)/calcLib.o
+libcalc: lib ## Generate the calc lib file (is needed)
 
 clean: ## Clean generated files
 	rm -r *.o 
