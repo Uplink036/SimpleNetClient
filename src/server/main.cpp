@@ -18,12 +18,11 @@
 const char* SERVER_PROTOCOLS[] = {
   "TEXT TCP 1.1\n",
   "\n",
-
 };
 
 void validate_input_args(int argc, char *argv[])
 {
-  DEBUG_FUNCTION("client::main::validate_input_args(&d, ...)\n", argc)
+  DEBUG_FUNCTION("server::main::validate_input_args(&d, ...)\n", argc);
   if (argc != 2)
   {
     printf("Unexpected amount of inputs, expected [<PROGRAM>] [<PORT>], got %d arguments\n", argc);
@@ -40,6 +39,7 @@ void validate_input_args(int argc, char *argv[])
 
 void populateTCPHint(addrinfo* hints)
 {
+  DEBUG_FUNCTION("server::main::populateTCPHint(%p)\n", hints);
   memset(hints, 0, sizeof(addrinfo));
   hints->ai_family = AF_UNSPEC;
   hints->ai_protocol = IPPROTO_TCP;
@@ -48,6 +48,7 @@ void populateTCPHint(addrinfo* hints)
 
 bool sendServerInformation(int client_fd)
 {
+  DEBUG_FUNCTION("server::main::sendServerInformation(%d)\n", client_fd);
   int protocol_index = 0;
   do 
   {
@@ -87,7 +88,9 @@ struct ApplicationProtocl
 
 bool getClientProtocol(int client_fd, ApplicationProtocl* clientProtocol)
 {
+  DEBUG_FUNCTION("server::main::getClientProtocol(%d, %p)\n", client_fd, clientProtocol);
   char msg[MAX_MESSGE_SIZE];
+  memset(msg, 0, MAX_MESSGE_SIZE);
   static const int max_buffer_size = sizeof(msg)-1;
   int readSize=recv(client_fd,&msg, max_buffer_size, 0);
   IF_NEGATIVE(readSize)
@@ -97,7 +100,7 @@ bool getClientProtocol(int client_fd, ApplicationProtocl* clientProtocol)
       return false;
   }
 
-  IF_NOT_ZERO(strcmp(msg, "\n"))
+  IF_ZERO(strcmp(msg, "\n"))
   {
       perror("protocol type");
       close(client_fd);
@@ -105,26 +108,28 @@ bool getClientProtocol(int client_fd, ApplicationProtocl* clientProtocol)
   }
 
   int protocol_index = 0;
-  while (strcmp(SERVER_PROTOCOLS[protocol_index], "\n") == 0)
+  while (!(strcmp(SERVER_PROTOCOLS[protocol_index], "\n") == 0))
   {
-    const char* protocl = SERVER_PROTOCOLS[protocol_index];
+    const char* protocl = SERVER_PROTOCOLS[protocol_index++];
     const int protocol_length = strlen(protocl)-1;
     IF_ZERO(strncmp(protocl, msg, protocol_length))
     {
-      IF_ZERO(strcmp(msg+protocol_length, "OK\n"))
+        IF_ZERO(strcmp(msg+protocol_length, " OK\n"))
       {
         clientProtocol->com = TEXT;
         return true;
       }
     }
   }
+  DEBUG_FUNCTION("server::main::getClientProtocol - Found no matching protocols for %s\n", msg);
   return false;
 }
 
 
 bool sendClientTask(int client_fd)
 {
-  const char task[] = "add 1 1";
+  DEBUG_FUNCTION("server::main::sendClientTask(%d)\n", client_fd);
+  const char task[] = "add 1 1\n";
   IF_NEGATIVE(send(client_fd, &task, strlen(task), 0))
     return false;
   return true;
@@ -132,6 +137,7 @@ bool sendClientTask(int client_fd)
 
 bool recvClientResponse(int client_fd)
 {
+  DEBUG_FUNCTION("server::main::recvClientResponse(%d)\n", client_fd);
   char msg[1500];
 	static const int max_buffer_size= sizeof(msg)-1;
   int readSize=recv(client_fd,&msg,max_buffer_size,0);
@@ -144,6 +150,7 @@ bool recvClientResponse(int client_fd)
 
 bool clientTask(int client_fd)
 {
+  DEBUG_FUNCTION("server::main::clientTask(%d)\n", client_fd);
   if(sendClientTask(client_fd) EQUALS false)
   {
     close(client_fd);
@@ -159,6 +166,7 @@ bool clientTask(int client_fd)
 
 void listenOnPort(int socket_fd, addrinfo* serverIP)
 {
+  DEBUG_FUNCTION("server::main::listenOnPort(%d, %p)\n", socket_fd, serverIP);
   int childCnt=0;
   socklen_t socket_in_size;
   struct sockaddr_storage their_addr;
@@ -191,6 +199,8 @@ void listenOnPort(int socket_fd, addrinfo* serverIP)
 
 int bindPort(char* desiredPort, addrinfo** selectedIP)
 {
+  DEBUG_FUNCTION("server::main::bindPort(%s, %p)\n", desiredPort, selectedIP);
+
   addrinfo hints;
   addrinfo* avaliableIPs;
   int returnValue;
