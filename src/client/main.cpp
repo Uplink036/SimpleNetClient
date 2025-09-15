@@ -13,7 +13,7 @@
 
 void validate_input_args(int argc, char *argv[])
 {
-  DEBUG_FUNCTION("client::main::validate_input_args(&d, ...)\n", argc)
+  DEBUG_FUNCTION("client::main::validate_input_args(&d, ...)\n", argc);
   if (argc != 2)
   {
     printf("Unexpected amount of inputs, expected [<PROGRAM>] [<DNS|IPv4|IPv6>:<PORT>], got %d arguments\n", argc);
