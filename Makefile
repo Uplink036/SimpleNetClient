@@ -36,9 +36,11 @@ tests_client:
 	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_client.o -c $(TEST_DIR)/client/*.cpp 
 
 tests: client tests_client
-	rm $(BUILD_DIR)/c_main.o
-	$(CXX) $(LD_FLAGS) -o test_client.out $(BUILD_DIR)/c_*.o $(BUILD_DIR)/t_client.o -lcommon
-
+	{ \
+		set -e; \
+		FILES_TO_COMPILE=$$(find ./build/*.o ! -name "*_main.o");\
+		$(CXX) $(LD_FLAGS) -o test_client.out $$FILES_TO_COMPILE -lcommon; \
+	}
 manual_test: main.o calcLib.o ## Compile a test file of calculations
 	$(CXX) $(LD_FLAGS) -o test.out $(BUILD_DIR)/main.o -lcommon
 
@@ -54,8 +56,8 @@ lib: $(LIBRARY_OBJS) ## Generate the calc lib file (is needed)
 libcalc: lib ## Generate the calc lib file (is needed)
 
 clean: ## Clean generated files
-	rm -r *.o 
-	rm *.a *.out
+	rm -f *.o  build/*.o
+	rm -f *.a *.out
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
