@@ -11,6 +11,8 @@ BOOST_AUTO_TEST_CASE( testIPv4 )
   BOOST_TEST(returnValue == 0);
   BOOST_TEST(std::string("192.156.12.3") == ip);
   BOOST_TEST(std::string("5000") == port);
+  free(ip);
+  free(port);
 }
 
 BOOST_AUTO_TEST_CASE( testIPv6 )
@@ -22,6 +24,8 @@ BOOST_AUTO_TEST_CASE( testIPv6 )
   BOOST_TEST(returnValue == 0);
   BOOST_TEST(std::string("2001:0db8:0000:0000:0000:0000:1428:07ab") == ip);
   BOOST_TEST(std::string("5000") == port);
+  free(ip);
+  free(port);
 }
 
 BOOST_AUTO_TEST_CASE( testDNS )
@@ -33,6 +37,8 @@ BOOST_AUTO_TEST_CASE( testDNS )
   BOOST_TEST(returnValue == 0);
   BOOST_TEST(std::string("www.google.com") == ip);
   BOOST_TEST(std::string("5000") == port);
+  free(ip);
+  free(port);
 }
 
 BOOST_AUTO_TEST_CASE( testNoPort )
@@ -68,9 +74,10 @@ BOOST_AUTO_TEST_CASE( testIPIsNotInt )
   char* ip;
   char* port; 
   int returnValue = splitIPPortFromString(ipv4, &ip, &port);
-  int portLength = strlen(port);
   BOOST_TEST_CONTEXT( "port is " << port)
   {
     BOOST_CHECK(returnValue < 0);
   }
+  free(ip);
+  free(port);
 }

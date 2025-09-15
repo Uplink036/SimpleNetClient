@@ -39,7 +39,7 @@ tests: client tests_client
 	{ \
 		set -e; \
 		FILES_TO_COMPILE=$$(find ./build/*.o ! -name "*_main.o");\
-		$(CXX) $(LD_FLAGS) -o test_client.out $$FILES_TO_COMPILE -lcommon; \
+		$(CXX) $(LD_FLAGS) -fsanitize=address -o test_client.out $$FILES_TO_COMPILE -lcommon; \
 	}
 manual_test: main.o calcLib.o ## Compile a test file of calculations
 	$(CXX) $(LD_FLAGS) -o test.out $(BUILD_DIR)/main.o -lcommon

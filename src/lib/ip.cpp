@@ -35,10 +35,12 @@ int splitIPPortFromString(char* string, char**ip, char** port)
         {
         int destinationLength = i;
         int portLength = inputLen - (i);
-        *ip = (char*)malloc(sizeof(destinationLength)*sizeof(**ip));
+        *ip = (char*)malloc((destinationLength+2)*sizeof(char));
+        memset(*ip, 0, (destinationLength+2)*sizeof(char));
         strncpy(*ip, string, destinationLength);
-        *port = (char*)malloc(sizeof(portLength)*sizeof(**port));
-        strncpy(*port, string+i+1, portLength);
+        *port = (char*)malloc((portLength+2)*sizeof(char));
+        memset(*port, 0, (portLength+2)*sizeof(char));
+        strncpy(*port, string+i+1, portLength-1);
         break;
         }
     }
