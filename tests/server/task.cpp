@@ -41,4 +41,46 @@ BOOST_AUTO_TEST_CASE( testTaskCorrectResultValues)
     free(task);
 }
 
+
+BOOST_AUTO_TEST_CASE( tesTaskToStringADD)
+{
+    STask task;
+    task.opID = op::ADD;
+    task.valueOne = 1;
+    task.valueTwo = 1;
+    char* taskString = taskToString(&task);
+    BOOST_ASSERT(std::string("ADD 1 1\n") == taskString);
+}
+
+BOOST_AUTO_TEST_CASE( tesTaskToStringSUB)
+{
+    STask task;
+    task.opID = op::SUB;
+    task.valueOne = 1;
+    task.valueTwo = 1;
+    char* taskString = taskToString(&task);
+    BOOST_ASSERT(std::string("SUB 1 1\n") == taskString);
+}
+
+BOOST_AUTO_TEST_CASE( tesTaskToStringDIV)
+{
+    STask task;
+    task.opID = op::DIV;
+    task.valueOne = 1;
+    task.valueTwo = 1;
+    char* taskString = taskToString(&task);
+    BOOST_ASSERT(std::string("DIV 1 1\n") == taskString);
+}
+
+BOOST_AUTO_TEST_CASE( tesTaskToStringMUL)
+{
+    STask task;
+    task.opID = op::MUL;
+    task.valueOne = 1;
+    task.valueTwo = 1;
+    char* taskString = taskToString(&task);
+    BOOST_ASSERT(std::string("MUL 1 1\n") == taskString);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
