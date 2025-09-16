@@ -6,6 +6,7 @@
 #include <memory.h>
 #include <cmath>
 #include <debug.h>
+#include <string> 
 
 enum op
 {
@@ -25,5 +26,5 @@ struct STask
 typedef struct STask STask;
 
 STask* getRandomTask();
-
+char* taskToString(STask*);
 #endif

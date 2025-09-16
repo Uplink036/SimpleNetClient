@@ -33,10 +33,22 @@ STask* getRandomTask()
 {
     DEBUG_FUNCTION("server::task::getRandomTask(%s)", "");
     STask* task = (STask*)malloc(sizeof(*task));
-    // memset(task, 0, sizeof(*task));
+    memset(task, 0, sizeof(*task));
     task->opID =  op(randomInt() % 4);
     task->valueOne = randomInt();
     task->valueTwo = randomInt();
     task->result = taskResult(task);
     return task;
+}
+
+char* taskToString(STask* task)
+{
+    DEBUG_FUNCTION("server::task::getRandomTask(%s)", "");
+    const int stringSize = 15+1;
+    char* taskString = (char*)calloc(stringSize, sizeof(char));
+    snprintf(taskString, stringSize, "%s %d %d\n",
+            arith[task->opID],
+            task->valueOne,
+            task->valueTwo);
+    return taskString;
 }

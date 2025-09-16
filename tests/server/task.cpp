@@ -50,6 +50,7 @@ BOOST_AUTO_TEST_CASE( tesTaskToStringADD)
     task.valueTwo = 1;
     char* taskString = taskToString(&task);
     BOOST_ASSERT(std::string("ADD 1 1\n") == taskString);
+    free(taskString);
 }
 
 BOOST_AUTO_TEST_CASE( tesTaskToStringSUB)
@@ -60,6 +61,7 @@ BOOST_AUTO_TEST_CASE( tesTaskToStringSUB)
     task.valueTwo = 1;
     char* taskString = taskToString(&task);
     BOOST_ASSERT(std::string("SUB 1 1\n") == taskString);
+    free(taskString);
 }
 
 BOOST_AUTO_TEST_CASE( tesTaskToStringDIV)
@@ -70,6 +72,7 @@ BOOST_AUTO_TEST_CASE( tesTaskToStringDIV)
     task.valueTwo = 1;
     char* taskString = taskToString(&task);
     BOOST_ASSERT(std::string("DIV 1 1\n") == taskString);
+    free(taskString);
 }
 
 BOOST_AUTO_TEST_CASE( tesTaskToStringMUL)
@@ -80,6 +83,7 @@ BOOST_AUTO_TEST_CASE( tesTaskToStringMUL)
     task.valueTwo = 1;
     char* taskString = taskToString(&task);
     BOOST_ASSERT(std::string("MUL 1 1\n") == taskString);
+    free(taskString);
 }
 
 
