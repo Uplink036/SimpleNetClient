@@ -1,6 +1,7 @@
 #include <ip.h>
-#define BOOST_TEST_MODULE module_ip
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
+
+BOOST_AUTO_TEST_SUITE( TestIPSuit )
 
 BOOST_AUTO_TEST_CASE( testIPv4 )
 {
@@ -81,3 +82,5 @@ BOOST_AUTO_TEST_CASE( testIPIsNotInt )
   free(ip);
   free(port);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

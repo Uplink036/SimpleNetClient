@@ -11,7 +11,7 @@ CLIENT_OBJ    = c_main.o
 CLIENT_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(CLIENT_OBJ))
 
 SERVER_DIR    = $(SRC_DIR)/server
-SERVER_OBJ    = s_main.o
+SERVER_OBJ    = s_main.o s_task.o
 SERVER_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(SERVER_OBJ))
 
 LIBRARY_DIR   = $(SRC_DIR)/lib
@@ -32,15 +32,20 @@ $(BUILD_DIR)/l_%.o : $(LIBRARY_DIR)/%.cpp
 main.o: lib/main.cpp
 	$(CXX) $(CXXFLAGS) $(CFLAGS) -c lib/main.cpp -o $(BUILD_DIR)/main.o
 
-tests_client:
+test_client_object: client
 	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_client.o -c $(TEST_DIR)/client/*.cpp 
 
-tests: client tests_client
+test_server_object: server
+	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_server.o -c $(TEST_DIR)/server/*.cpp 
+
+tests: test_client_object test_server_object
+	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_suit.o -c $(TEST_DIR)/test.cpp 
 	{ \
 		set -e; \
 		FILES_TO_COMPILE=$$(find ./build/*.o ! -name "*_main.o");\
 		$(CXX) $(LD_FLAGS) -fsanitize=address -o test_client.out $$FILES_TO_COMPILE -lcommon; \
 	}
+
 manual_test: main.o calcLib.o ## Compile a test file of calculations
 	$(CXX) $(LD_FLAGS) -o test.out $(BUILD_DIR)/main.o -lcommon
 
