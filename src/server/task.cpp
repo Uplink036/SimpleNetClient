@@ -4,10 +4,33 @@ bool sendClientTask(int client_fd, STask* task)
 {
     DEBUG_FUNCTION("server::task::sendClientTask(%d)\n", client_fd);
     const char* taskString = taskToString(task);
-    DEBUG_FUNCTION("server::task::sendClientTask - Sending %s", taskString);
-    IF_NEGATIVE(send(client_fd, &taskString, strlen(taskString), 0))
+    const int stringLength = strlen(taskString);
+    const int noBytesSent = send(client_fd, taskString, stringLength, 0);
+    IF_NEGATIVE(noBytesSent)
       return false;
     return true;
+}
+
+bool sendClientSuccess(int client_fd)
+{
+  DEBUG_FUNCTION("server::task::sendClientFail(%d)\n", client_fd);
+  const char successMessage[] = "OK\n";
+  const int stringLength = strlen(successMessage);
+  const int noBytesSent = send(client_fd, successMessage, stringLength, 0);
+  IF_NEGATIVE(noBytesSent)
+    return false;
+  return true;
+}
+
+bool sendClientFail(int client_fd)
+{
+  DEBUG_FUNCTION("server::task::sendClientFail(%d)\n", client_fd);
+  const char failMessage[] = "ERROR\n";
+  const int stringLength = strlen(failMessage);
+  const int noBytesSent = send(client_fd, failMessage, stringLength, 0);
+  IF_NEGATIVE(noBytesSent)
+    return false;
+  return true;
 }
 
 bool recvClientTaskResult(int client_fd, STask* task)
@@ -20,8 +43,11 @@ bool recvClientTaskResult(int client_fd, STask* task)
       return false;
     char* endPointer = msg+readSize;
     int result = strtol(msg, &endPointer, 10);
-    IF_NOT_ZERO(result == task->result)
-      return false;
+    DEBUG_FUNCTION("server::task::recvClientTaskResult - Result %d Task %d\n", result, task->result);
+    IF_ZERO(result == task->result)
+      sendClientFail(client_fd);
+    else
+      sendClientSuccess(client_fd);
     return true;
 }
 
@@ -29,17 +55,17 @@ bool clientTask(int client_fd)
 {
     DEBUG_FUNCTION("server::task::clientTask(%d)\n", client_fd);
     STask* task = getRandomTask(); 
+    bool success = false;
     if(sendClientTask(client_fd, task) EQUALS true)
     {
       if(recvClientTaskResult(client_fd, task) EQUALS true)
       {
-        free(task);
-        return true;
+        success = true;
       }
     }
     close(client_fd);
     free(task);
-    return false;
+    return success;
 }
 
 int taskResult(STask* task)
