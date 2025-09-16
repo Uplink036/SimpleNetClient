@@ -32,8 +32,8 @@ struct STask
 };
 typedef struct STask STask;
 
-bool sendClientTask(int client_fd);
-bool recvClientResponse(int client_fd);
+bool sendClientTask(int client_fd, STask* task);
+bool recvClientTaskResult(int client_fd, STask* task);
 bool clientTask(int client_fd);
 STask* getRandomTask();
 char* taskToString(STask*);

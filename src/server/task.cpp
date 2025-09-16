@@ -1,41 +1,45 @@
 #include <task.h>
 
-bool sendClientTask(int client_fd)
+bool sendClientTask(int client_fd, STask* task)
 {
-  DEBUG_FUNCTION("server::main::sendClientTask(%d)\n", client_fd);
-  const char task[] = "add 1 1\n";
-  IF_NEGATIVE(send(client_fd, &task, strlen(task), 0))
-    return false;
-  return true;
+    DEBUG_FUNCTION("server::task::sendClientTask(%d)\n", client_fd);
+    const char* taskString = taskToString(task);
+    DEBUG_FUNCTION("server::task::sendClientTask - Sending %s", taskString);
+    IF_NEGATIVE(send(client_fd, &taskString, strlen(taskString), 0))
+      return false;
+    return true;
 }
 
-bool recvClientResponse(int client_fd)
+bool recvClientTaskResult(int client_fd, STask* task)
 {
-  DEBUG_FUNCTION("server::main::recvClientResponse(%d)\n", client_fd);
-  char msg[1500];
-	static const int max_buffer_size= sizeof(msg)-1;
-  int readSize=recv(client_fd,&msg,max_buffer_size,0);
-  IF_NEGATIVE(readSize)
-    return false;
-  IF_NOT_ZERO(strncmp(msg, "2\n", readSize))
-    return false;
-  return true;
+    DEBUG_FUNCTION("server::task::recvClientTaskResult(%d)\n", client_fd);
+    char msg[1500];
+    static const int max_buffer_size= sizeof(msg)-1;
+    int readSize=recv(client_fd,&msg,max_buffer_size,0);
+    IF_NEGATIVE(readSize)
+      return false;
+    char* endPointer = msg+readSize;
+    int result = strtol(msg, &endPointer, 10);
+    IF_NOT_ZERO(result == task->result)
+      return false;
+    return true;
 }
 
 bool clientTask(int client_fd)
 {
-  DEBUG_FUNCTION("server::main::clientTask(%d)\n", client_fd);
-  if(sendClientTask(client_fd) EQUALS false)
-  {
+    DEBUG_FUNCTION("server::task::clientTask(%d)\n", client_fd);
+    STask* task = getRandomTask(); 
+    if(sendClientTask(client_fd, task) EQUALS true)
+    {
+      if(recvClientTaskResult(client_fd, task) EQUALS true)
+      {
+        free(task);
+        return true;
+      }
+    }
     close(client_fd);
+    free(task);
     return false;
-  }
-  if(recvClientResponse(client_fd) EQUALS false)
-  {
-    close(client_fd);
-    return false;
-  }
-  return true;
 }
 
 int taskResult(STask* task)
@@ -46,23 +50,23 @@ int taskResult(STask* task)
     double temp;
     switch (task->opID)
     {
-        case op::ADD:
-            opResult = task->valueOne + task->valueTwo;
-            break;
-        case op::SUB:
-            opResult = task->valueOne - task->valueTwo;
-            break;
-        case op::MUL:
-            opResult = task->valueOne * task->valueTwo;
-            break;
-        case op::DIV:
-            temp = task->valueOne / task->valueTwo;
-            opResult = round(temp);
-            break;
-        default:
-            perror("Found an unidentified op");
-            return -1;
-            break;
+      case op::ADD:
+        opResult = task->valueOne + task->valueTwo;
+        break;
+      case op::SUB:
+        opResult = task->valueOne - task->valueTwo;
+        break;
+      case op::MUL:
+        opResult = task->valueOne * task->valueTwo;
+        break;
+      case op::DIV:
+        temp = task->valueOne / task->valueTwo;
+        opResult = round(temp);
+        break;
+      default:
+        perror("Found an unidentified op");
+        return -1;
+        break;
     }
     return opResult;
 }

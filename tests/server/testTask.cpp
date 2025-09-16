@@ -41,6 +41,37 @@ BOOST_AUTO_TEST_CASE( testTaskCorrectResultValues)
     free(task);
 }
 
+BOOST_AUTO_TEST_CASE( testTaskRobustness)
+{
+    for (int i = 0; i < 10; i++)
+    {
+        STask* task = getRandomTask();
+        int opResult;
+        double temp;
+        switch (task->opID)
+        {
+        case op::ADD:
+            opResult = task->valueOne + task->valueTwo;
+            break;
+        case op::SUB:
+            opResult = task->valueOne - task->valueTwo;
+            break;
+        case op::MUL:
+            opResult = task->valueOne * task->valueTwo;
+            break;
+        case op::DIV:
+            temp = task->valueOne / task->valueTwo;
+            opResult = round(temp);
+            break;
+        default:
+            BOOST_FAIL("Unexpected operand in task");
+            break;
+        }
+        BOOST_TEST(task->result == opResult);
+        free(task);
+    }
+}
+
 
 BOOST_AUTO_TEST_CASE( tesTaskToStringADD)
 {
