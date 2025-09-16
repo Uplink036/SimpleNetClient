@@ -19,4 +19,4 @@ jobs:
     - name: compile tests
       run: make tests
     - name: run tests
-      run: ./test_client.out
+      run: ./tests.out
