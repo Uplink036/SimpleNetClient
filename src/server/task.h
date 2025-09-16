@@ -3,6 +3,9 @@
 
 #include <calc.h>
 #include <stdio.h>
+#include <memory.h>
+#include <cmath>
+#include <debug.h>
 
 enum op
 {
@@ -21,6 +24,6 @@ struct STask
 };
 typedef struct STask STask;
 
-STask getTask();
+STask* getRandomTask();
 
 #endif
