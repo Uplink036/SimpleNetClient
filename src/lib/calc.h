@@ -19,6 +19,7 @@ Implementation in calcLib.c
 
 */
   
+  extern const char *arith[4];
 
   int initCalcLib(void); // Init internal variables to the library, if needed. 
   int initCalcLib_seed(unsigned int seed); // Init internal variables to the library, use <seed> for specific variable. 
