@@ -2,7 +2,7 @@
 
 int taskResult(STask* task)
 {
-    DEBUG_FUNCTION("server::task::taskResult(%d, %d, %d)",
+    DEBUG_FUNCTION("server::task::taskResult(%d, %d, %d)\n",
                     task->opID, task->valueOne, task->valueTwo);
     int opResult;
     double temp;
@@ -31,7 +31,7 @@ int taskResult(STask* task)
 
 STask* getRandomTask()
 {
-    DEBUG_FUNCTION("server::task::getRandomTask(%s)", "");
+    DEBUG_FUNCTION("server::task::getRandomTask(%s)\n", "");
     STask* task = (STask*)malloc(sizeof(*task));
     memset(task, 0, sizeof(*task));
     task->opID =  op(randomInt() % 4);
@@ -43,8 +43,9 @@ STask* getRandomTask()
 
 char* taskToString(STask* task)
 {
-    DEBUG_FUNCTION("server::task::getRandomTask(%s)", "");
-    const int stringSize = 15+1;
+    DEBUG_FUNCTION("server::task::taskToString(%d, %d, %d)\n",
+                    task->opID, task->valueOne, task->valueTwo);
+    const size_t stringSize = 31+1;
     char* taskString = (char*)calloc(stringSize, sizeof(char));
     snprintf(taskString, stringSize, "%s %d %d\n",
             arith[task->opID],
