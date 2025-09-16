@@ -1,5 +1,43 @@
 #include <task.h>
 
+bool sendClientTask(int client_fd)
+{
+  DEBUG_FUNCTION("server::main::sendClientTask(%d)\n", client_fd);
+  const char task[] = "add 1 1\n";
+  IF_NEGATIVE(send(client_fd, &task, strlen(task), 0))
+    return false;
+  return true;
+}
+
+bool recvClientResponse(int client_fd)
+{
+  DEBUG_FUNCTION("server::main::recvClientResponse(%d)\n", client_fd);
+  char msg[1500];
+	static const int max_buffer_size= sizeof(msg)-1;
+  int readSize=recv(client_fd,&msg,max_buffer_size,0);
+  IF_NEGATIVE(readSize)
+    return false;
+  IF_NOT_ZERO(strncmp(msg, "2\n", readSize))
+    return false;
+  return true;
+}
+
+bool clientTask(int client_fd)
+{
+  DEBUG_FUNCTION("server::main::clientTask(%d)\n", client_fd);
+  if(sendClientTask(client_fd) EQUALS false)
+  {
+    close(client_fd);
+    return false;
+  }
+  if(recvClientResponse(client_fd) EQUALS false)
+  {
+    close(client_fd);
+    return false;
+  }
+  return true;
+}
+
 int taskResult(STask* task)
 {
     DEBUG_FUNCTION("server::task::taskResult(%d, %d, %d)\n",
