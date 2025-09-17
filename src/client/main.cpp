@@ -9,6 +9,7 @@
 #include "ip.h"
 #include "debug.h"
 #include "calc.h"
+#include "netparser.h"
 
 
 void validate_input_args(int argc, char *argv[])
@@ -17,7 +18,14 @@ void validate_input_args(int argc, char *argv[])
   if (argc != 2)
   {
     printf("Unexpected amount of inputs, expected [<PROGRAM>] [<DNS|IPv4|IPv6>:<PORT>], got %d arguments\n", argc);
-    fflush(stdout);
+    exit(-1);
+  }
+  if (strstr(argv[1], "///") != NULL ){
+    printf("Invalid format: %s.\n", argv[1]);
+    exit(-1); 
+  }
+  if (strstr(argv[1], "://") != NULL) {
+    printf("Invalid format: missing '://'\n");
     exit(-1);
   }
 }
@@ -25,14 +33,12 @@ void validate_input_args(int argc, char *argv[])
 int main(int argc, char *argv[]){
   validate_input_args(argc, argv);
   
+  char protocolstring[6], pathstring[7];
+  getProtocol(argv[1], protocolstring);
+  getAPI(argv[1], pathstring);
   char* destination;
   char* destinationPort; 
-  int returnValue = splitIPPortFromString(argv[1], &destination, &destinationPort);
-  if (returnValue < 0)
-  {
-    printf("Did not find viable IP and PORT, exiting...\n");
-    exit(-1);
-  }
+  getIPnPORT(argv[1], &destination, &destinationPort);
 
   addrinfo hints;
   memset(&hints, 0, sizeof(addrinfo));
@@ -42,7 +48,7 @@ int main(int argc, char *argv[]){
   addrinfo* results;
 
   printf("Host %s, and port %s.\n",destination, destinationPort);
-  returnValue = getaddrinfo(
+  int returnValue = getaddrinfo(
     destination,
     destinationPort,
     &hints,
