@@ -13,7 +13,7 @@ bool sendClientTask(int client_fd, STask* task)
 
 bool sendClientSuccess(int client_fd)
 {
-  DEBUG_FUNCTION("server::task::sendClientFail(%d)\n", client_fd);
+  DEBUG_FUNCTION("server::task::sendClientSuccess(%d)\n", client_fd);
   const char successMessage[] = "OK\n";
   const int stringLength = strlen(successMessage);
   const int noBytesSent = send(client_fd, successMessage, stringLength, 0);
@@ -42,9 +42,9 @@ bool recvClientTaskResult(int client_fd, STask* task)
     IF_NEGATIVE(readSize)
       return false;
     char* endPointer = msg+readSize;
-    int result = strtol(msg, &endPointer, 10);
-    DEBUG_FUNCTION("server::task::recvClientTaskResult - Result %d Task %d\n", result, task->result);
-    IF_ZERO(result == task->result)
+    int result = (int)strtol(msg, &endPointer, 10);
+    DEBUG_FUNCTION("server::task::recvClientTaskResult - Result %d Task %d Truth %d\n", result, task->result, (result==task->result));
+    IF_ZERO((result == task->result))
       sendClientFail(client_fd);
     else
       sendClientSuccess(client_fd);

@@ -18,6 +18,14 @@ Both ifdef/ifndef have corresponding endif's at the end, and in the correct sequ
 Implementation in calcLib.c
 
 */
+
+enum op
+{
+    ADD,
+    DIV,
+    MUL, 
+    SUB
+};
   
   extern const char *arith[4];
 

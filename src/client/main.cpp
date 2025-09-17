@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <cmath>
 #include "ip.h"
 #include "debug.h"
 #include "calc.h"
@@ -28,6 +29,20 @@ void validate_input_args(int argc, char *argv[])
     printf("Invalid format: missing '://'\n");
     exit(-1);
   }
+}
+
+enum op stringToOp(char* input)
+{
+  IF_ZERO(strcmp("add", input))
+    return op::ADD;
+  IF_ZERO(strcmp("sub", input))
+    return op::SUB;
+  IF_ZERO(strcmp("mul", input))
+    return op::MUL;
+  IF_ZERO(strcmp("div", input))
+    return op::DIV;
+  printf("ERROR - %s is not a defined op", input);
+  exit(-1);
 }
 
 int main(int argc, char *argv[]){
@@ -100,12 +115,43 @@ int main(int argc, char *argv[]){
         char successMessage[100];
         sprintf(successMessage, "%s %s 1.1 OK\n", pathstring, protocolstring);
         send(socketfd, successMessage, strlen(successMessage), 0);
-        break;
       }
+      DEBUG_FUNCTION("Waiting for task %d\n", foundProtocl);
       memset(msg, 0, 1500);
       int readSize=recv(socketfd,&msg,max_buffer_size,0);
-      IF_NEGATIVE(readSize)
-        return false;
+      DEBUG_FUNCTION("Got task %s", msg);
+      char operation[10];
+      int valueOne, valueTwo;
+      sscanf(msg, "%s %d %d", operation, &valueOne, &valueTwo);    
+      DEBUG_FUNCTION("Split task into %s %d %d\n", operation, valueOne, valueTwo);
+      int result;
+      double temp;
+      switch (stringToOp(operation))
+      {
+      case op::ADD:
+          result = valueOne + valueTwo;
+          break;
+      case op::SUB:
+          result = valueOne - valueTwo;
+          break;
+      case op::MUL:
+          result = valueOne * valueTwo;
+          break;
+      case op::DIV:
+          temp = valueOne / valueTwo;
+          result = round(temp);
+          break;
+      default:
+        break;
+      }
+      DEBUG_FUNCTION("Calculated %d\n", result);
+      char resultMessage[100];
+      memset(resultMessage, 0, 100);
+      sprintf(resultMessage, "%d\n", result);
+      send(socketfd, resultMessage, strlen(resultMessage),0);
+      memset(msg, 0, 1500);
+      recv(socketfd, &msg, max_buffer_size, 0);
+      printf("Server Response - %s\n", msg);
       break;
     }
   }
