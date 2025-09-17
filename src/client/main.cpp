@@ -10,11 +10,11 @@
 #include "debug.h"
 #include "calc.h"
 #include "netparser.h"
-
-
+#include "macros.h"
+#include <ctype.h>
 void validate_input_args(int argc, char *argv[])
 {
-  DEBUG_FUNCTION("client::main::validate_input_args(&d, ...)\n", argc);
+  DEBUG_FUNCTION("client::main::validate_input_args(%d, ...)\n", argc);
   if (argc != 2)
   {
     printf("Unexpected amount of inputs, expected [<PROGRAM>] [<DNS|IPv4|IPv6>:<PORT>], got %d arguments\n", argc);
@@ -24,7 +24,7 @@ void validate_input_args(int argc, char *argv[])
     printf("Invalid format: %s.\n", argv[1]);
     exit(-1); 
   }
-  if (strstr(argv[1], "://") != NULL) {
+  if (strstr(argv[1], "://") == NULL) {
     printf("Invalid format: missing '://'\n");
     exit(-1);
   }
@@ -36,6 +36,10 @@ int main(int argc, char *argv[]){
   char protocolstring[6], pathstring[7];
   getProtocol(argv[1], protocolstring);
   getAPI(argv[1], pathstring);
+  for (int i = 0; i < 7; i++)
+  {
+    pathstring[i] = toupper(pathstring[i]);
+  }
   char* destination;
   char* destinationPort; 
   getIPnPORT(argv[1], &destination, &destinationPort);
@@ -47,7 +51,7 @@ int main(int argc, char *argv[]){
   hints.ai_socktype = SOCK_STREAM;
   addrinfo* results;
 
-  printf("Host %s, and port %s.\n",destination, destinationPort);
+  DEBUG_FUNCTION("Host %s, and port %s.\n",destination, destinationPort);
   int returnValue = getaddrinfo(
     destination,
     destinationPort,
@@ -68,7 +72,42 @@ int main(int argc, char *argv[]){
         continue;
 
     if (connect(socketfd, rp->ai_addr, rp->ai_addrlen) == 0)
+    {
+      char expected_protocol[100];
+      bool foundProtocl = false;
+      sprintf(expected_protocol, "%s %s 1.1\n", pathstring, protocolstring);
+      char msg[1500];
+      static const int max_buffer_size = sizeof(msg)-1;
+      do
+      {
+        memset(msg, 0, 1500);
+        int readSize=recv(socketfd,&msg,max_buffer_size,0);
+        IF_NEGATIVE(readSize)
+          return false;
+        if (strcmp(msg, expected_protocol))
+          foundProtocl = true;
+        DEBUG_FUNCTION("client::main::fromServer - Received - %s", msg);
+      } while(msg[0] != '\n');
+
+      if (NOT foundProtocl)
+      {
+        char errorMessage[] = "ERROR\n";
+        send(socketfd, errorMessage, strlen(errorMessage), 0);
         break;
+      }
+      else 
+      {
+        char successMessage[100];
+        sprintf(successMessage, "%s %s 1.1 OK\n", pathstring, protocolstring);
+        send(socketfd, successMessage, strlen(successMessage), 0);
+        break;
+      }
+      memset(msg, 0, 1500);
+      int readSize=recv(socketfd,&msg,max_buffer_size,0);
+      IF_NEGATIVE(readSize)
+        return false;
+      break;
+    }
   }
   freeaddrinfo(results);
   close(socketfd);
