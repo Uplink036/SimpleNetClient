@@ -73,23 +73,20 @@ void populateTCPHint(addrinfo* hints)
   hints->ai_socktype = SOCK_STREAM;
 }
 
-void handleProtocol(bool foundProtocl, int socketfd, char pathstring[7], char protocolstring[6])
+int handleProtocol(bool foundProtocl, int socketfd, char pathstring[7], char protocolstring[6])
 {
   DEBUG_FUNCTION("client::main::handleProtocol(%d, %d, %s, %s)\n", \
                   foundProtocl, socketfd, pathstring, protocolstring );
   if (NOT foundProtocl)
   {
     char errorMessage[] = "ERROR\n";
-    send(socketfd, errorMessage, strlen(errorMessage), 0);
-    {
-      return;
-    };
+    return send(socketfd, errorMessage, strlen(errorMessage), 0);
   }
   else
   {
     char successMessage[100];
     sprintf(successMessage, "%s %s 1.1 OK\n", pathstring, protocolstring);
-    send(socketfd, successMessage, strlen(successMessage), 0);
+    return send(socketfd, successMessage, strlen(successMessage), 0);
   }
 }
 
@@ -159,11 +156,30 @@ int main(int argc, char *argv[]){
           char msg[1500];
           bool foundProtocl = getServerProtocols(socketfd, expected_protocol);
           if (NOT foundProtocl)
-            break;
-          handleProtocol(foundProtocl, socketfd, pathstring, protocolstring);
-          getServerTask(socketfd, msg);
+          {
+            printf("ERROR\n");
+            DEBUG_FUNCTION("Failed to get a protocol from server after %d checks\n", 2000);
+            exit(EXIT_FAILURE);
+          }
+          IF_NEGATIVE(handleProtocol(foundProtocl, socketfd, pathstring, protocolstring))
+          {
+            printf("ERROR\n");
+            DEBUG_FUNCTION("Could not send positive protocol to server %d\n", 0);
+            exit(EXIT_FAILURE);
+          }
+          IF_NEGATIVE(getServerTask(socketfd, msg))
+          {
+            printf("ERROR\n");
+            DEBUG_FUNCTION("Could not get task from server %d\n", 0);
+            exit(EXIT_FAILURE);
+          }
           int result = calculateServerTask(msg);
-          sendResultToServer(result, socketfd);
+          IF_NEGATIVE(sendResultToServer(result, socketfd))
+          {
+            printf("ERROR\n");
+            DEBUG_FUNCTION("Could not send result back to server %d\n", 0);
+            exit(EXIT_FAILURE);
+          }
           getResultResponseBack(socketfd);
           break;
         }
@@ -193,13 +209,13 @@ void getResultResponseBack(int socketfd)
   printf("Server Response - %s\n", msg);
 }
 
-void sendResultToServer(int result, int socketfd)
+int sendResultToServer(int result, int socketfd)
 {
   DEBUG_FUNCTION("client::main::sendResultToServer(%d, %d)\n", result, socketfd);
   char resultMessage[100];
   memset(resultMessage, 0, 100);
   sprintf(resultMessage, "%d\n", result);
-  send(socketfd, resultMessage, strlen(resultMessage), 0);
+  return send(socketfd, resultMessage, strlen(resultMessage), 0);
 }
 
 int calculateServerTask(char* msg)
@@ -238,13 +254,14 @@ int calculateServerTask(char* msg)
   return result;
 }
 
-void getServerTask(int socketfd, char* msg)
+int getServerTask(int socketfd, char* msg)
 {
   DEBUG_FUNCTION("client::main::getServerTask(%d %s)\n", socketfd, msg);
   static const int max_buffer_size = 1499;
   memset(msg, 0, 1500);
   int readSize = recv(socketfd, msg, max_buffer_size, 0);
   DEBUG_FUNCTION("client::main::getServerTask - Got %d bytes = %s", readSize, msg);
+  return readSize;
 }
 
 bool getServerProtocols(int socketfd, char* expected_protocol)
@@ -262,15 +279,9 @@ bool getServerProtocols(int socketfd, char* expected_protocol)
     IF_NEGATIVE(readSize)
     return false;
     if (strcmp(msg, expected_protocol))
-    foundProtocl = true;
+      foundProtocl = true;
     DEBUG_FUNCTION("client::main::fromServer - Received - %s", msg);
   } while (msg[0] != '\n' AND loop < 2000);
-  if (strlen(msg) < 2)
-  {
-    printf("ERROR\n");
-    DEBUG_FUNCTION("Failed to get a protocol from server after %d checks", loop);
-    exit(EXIT_FAILURE);
-  }
   DEBUG_FUNCTION("Got task %s", msg);
   fflush(stdout);
   return foundProtocl;

@@ -51,7 +51,7 @@ bool getClientProtocol(int client_fd, ApplicationProtocl* clientProtocol)
     const int protocol_length = strlen(protocl)-1;
     IF_ZERO(strncmp(protocl, msg, protocol_length))
     {
-        IF_ZERO(strcmp(msg+protocol_length, " OK\n"))
+      IF_ZERO(strcmp(msg+protocol_length, " OK\n"))
       {
         clientProtocol->com = TEXT;
         return true;
