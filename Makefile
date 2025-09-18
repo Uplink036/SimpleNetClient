@@ -48,13 +48,13 @@ tests: test_client_object test_server_object ## Compile all the tests
 	}
 
 manual_test: main.o ## Compile a test file of calculations
-	$(CXX) $(LD_FLAGS) -o test.out $(BUILD_DIR)/main.o -lcommon
+	$(CXX) $(LD_FLAGS) -o test $(BUILD_DIR)/main.o -lcommon
 
 client: $(CLIENT_OBJS) lib ## Compile the client file
-	$(CXX) $(LD_FLAGS) -o client.out $(BUILD_DIR)/c_*.o -lcommon
+	$(CXX) $(LD_FLAGS) -o client $(BUILD_DIR)/c_*.o -lcommon
 
 server: $(SERVER_OBJS) lib ## Compile the server file
-	$(CXX) $(LD_FLAGS) -o server.out $(BUILD_DIR)/s_*.o -lcommon
+	$(CXX) $(LD_FLAGS) -o server $(BUILD_DIR)/s_*.o -lcommon
 
 lib: $(LIBRARY_OBJS) ## Generate the calc lib file (is needed)
 	ar -rc libcommon.a -o $(BUILD_DIR)/l_*.o
