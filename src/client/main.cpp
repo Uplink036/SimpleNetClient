@@ -127,6 +127,7 @@ int main(int argc, char *argv[]){
   struct addrinfo *rp;
   int socketfd;
   bool foundServer = false;
+  bool timedOut = true;
   for (rp = results; rp != NULL; rp = rp->ai_next) {
     DEBUG_FUNCTION("Testing socket %p\n", rp);
     socketfd = socket(rp->ai_family, rp->ai_socktype,
@@ -143,6 +144,7 @@ int main(int argc, char *argv[]){
 
     if (select(socketfd + 1, NULL, &fdset, NULL, &tv) == 1)
     {
+        timedOut = false;
         int so_error;
         socklen_t len = sizeof so_error;
 
@@ -185,17 +187,23 @@ int main(int argc, char *argv[]){
         }
     }
   }
-  DEBUG_FUNCTION("Exiting socket lookup exit signal %d\n", foundServer);
-  freeaddrinfo(results);
-  close(socketfd);
-  free(destination);
-  free(destinationPort);
+  int exitStatus = 0;
   if (foundServer EQUALS false)
   {
     printf("ERROR\n");
     DEBUG_FUNCTION("Found no server to connect to on ip %s.\n", destination);
-    return 1;
+    exitStatus = 1;
   }
+  if (timedOut EQUALS true)
+  {
+    printf("ERROR: MESSAGE LOST (TIMEOUT)\n");
+    DEBUG_FUNCTION("Found no server to connect to on ip %s.\n", destination);
+    exitStatus = 1;
+  }
+  freeaddrinfo(results);
+  close(socketfd);
+  free(destination);
+  free(destinationPort);
   return 0;
 }
 
