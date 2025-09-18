@@ -46,7 +46,7 @@ enum op stringToOp(char* input)
     return op::DIV;
   printf("ERROR\n");
   DEBUG_FUNCTION("ERROR - %s is not a defined op", input);
-  exit(-1);
+  exit(EXIT_FAILURE);
 }
 
 void parseInputArgs(char *argv[], char protocolstring[6], char pathstring[7], char *&destination, char *&destinationPort)
@@ -174,7 +174,7 @@ int calculateServerTask(char* msg)
   {
     printf("ERROR\n");
     DEBUG_FUNCTION("Could not properly read scaned values - %s", msg);
-    exit(-1);
+    exit(EXIT_FAILURE);
   }    
   DEBUG_FUNCTION("Split task into %s %d %d\n", operation, valueOne, valueTwo);
   int result;
