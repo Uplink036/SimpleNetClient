@@ -160,7 +160,7 @@ int main(int argc, char *argv[]){
             exitStatus = 1;
             goto freeMain;
           }
-          getResultResponseBack(socketfd);
+          getResultResponseBack(socketfd, result);
           break;
         }
     }
@@ -191,14 +191,17 @@ int main(int argc, char *argv[]){
   return exitStatus;
 }
 
-void getResultResponseBack(int socketfd)
+void getResultResponseBack(int socketfd, int result)
 {
   DEBUG_FUNCTION("client::main::getResultResponseBack(%d)\n", socketfd);
   char msg[1500];
   memset(msg, 0, 1500);
   static const int max_buffer_size = sizeof(msg)-1;
   recv(socketfd, &msg, max_buffer_size, 0);
-  printf("Server Response - %s\n", msg);
+  if (strcmp(msg, "OK\n") == 0)
+    printf("OK myresult=%d\n", result);
+  else
+    printf("Fail myresult=%d, server response %s", result, msg);
 }
 
 int sendResultToServer(int result, int socketfd)
@@ -221,7 +224,7 @@ int calculateServerTask(char* msg)
     DEBUG_FUNCTION("Could not properly read scaned values - %s", msg);
     exit(EXIT_FAILURE);
   }    
-  DEBUG_FUNCTION("Split task into %s %d %d\n", operation, valueOne, valueTwo);
+  printf("ASSIGNMENT: %s %d %d\n", operation, valueOne, valueTwo);
   int result;
   double temp;
   switch (stringToOp(operation))
