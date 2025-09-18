@@ -44,7 +44,8 @@ enum op stringToOp(char* input)
     return op::MUL;
   IF_ZERO(strcmp("div", input))
     return op::DIV;
-  printf("ERROR - %s is not a defined op", input);
+  printf("ERROR\n");
+  DEBUG_FUNCTION("ERROR - %s is not a defined op", input);
   exit(-1);
 }
 
@@ -169,7 +170,12 @@ int calculateServerTask(char* msg)
   DEBUG_FUNCTION("client::main::calculateServerTask(%s)\n", msg);
   char operation[10];
   int valueOne, valueTwo;
-  sscanf(msg, "%s %d %d", operation, &valueOne, &valueTwo);    
+  IF_NEGATIVE(sscanf(msg, "%s %d %d", operation, &valueOne, &valueTwo))
+  {
+    printf("ERROR\n");
+    DEBUG_FUNCTION("Could not properly read scaned values - %s", msg);
+    exit(-1);
+  }    
   DEBUG_FUNCTION("Split task into %s %d %d\n", operation, valueOne, valueTwo);
   int result;
   double temp;
