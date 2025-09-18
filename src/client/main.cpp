@@ -128,7 +128,6 @@ int main(int argc, char *argv[]){
           foundServer = true;
           char expected_protocol[100];
           sprintf(expected_protocol, "%s %s 1.1\n", pathstring, protocolstring);
-          char msg[1500];
           bool foundProtocol = getServerProtocols(socketfd, expected_protocol, &fdset, &tv);
           if (NOT foundProtocol)
           {
@@ -145,6 +144,7 @@ int main(int argc, char *argv[]){
             exitStatus = 1;
             goto freeMain;
           }
+          char msg[1500];
           IF_NEGATIVE(getServerTask(socketfd, msg))
           {
             printf("ERROR: COULD NOT SEND TASK TO SERVER (TIMEOUT)\n");

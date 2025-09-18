@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE( testGetAPIText )
     char api[9];
     char input[] = "UDP://myserver.com:5000/text";
     getAPI(input, api);
-    BOOST_CHECK_EQUAL(std::string("text"), api);
+    BOOST_CHECK_EQUAL(std::string("TEXT"), api);
 }
 
 
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE( testGetAPIBinary)
     char api[9];
     char input[] = "UDP://myserver.com:5000/binary";
     getAPI(input, api);
-    BOOST_CHECK_EQUAL(std::string("binary"), api);
+    BOOST_CHECK_EQUAL(std::string("BINARY"), api);
 }
 
 BOOST_AUTO_TEST_CASE( testGetIPnPort)
