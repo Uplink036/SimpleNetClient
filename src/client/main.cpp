@@ -246,7 +246,13 @@ bool getServerProtocols(int socketfd, char* expected_protocol)
     if (strcmp(msg, expected_protocol))
     foundProtocl = true;
     DEBUG_FUNCTION("client::main::fromServer - Received - %s", msg);
-  } while (msg[0] != '\n');
+  } while (msg[0] != '\n' AND loop < 2000);
+  if (strlen(msg) < 2);
+  {
+    printf("ERROR\n");
+    DEBUG_FUNCTION("Failed to get a protocol from server after %d checks", loop);
+    exit(EXIT_FAILURE);
+  }
   DEBUG_FUNCTION("Got task %s", msg);
   fflush(stdout);
   return foundProtocl;
