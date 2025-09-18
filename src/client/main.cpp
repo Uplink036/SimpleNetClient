@@ -46,7 +46,7 @@ enum op stringToOp(char* input)
     return op::MUL;
   IF_ZERO(strcmp("div", input))
     return op::DIV;
-  printf("ERROR\n");
+  printf("ERROR: GOT UNEXPECTED OP COMMAND\n");
   DEBUG_FUNCTION("ERROR - %s is not a defined op", input);
   exit(EXIT_FAILURE);
 }
@@ -134,15 +134,12 @@ int main(int argc, char *argv[]){
       continue;
     }
     fcntl(socketfd, F_SETFL, O_NONBLOCK);
-
     connect(socketfd,  rp->ai_addr, rp->ai_addrlen);
     FD_SET(socketfd, &fdset);
-
     if (select(socketfd + 1, NULL, &fdset, NULL, &tv) == 1)
     {
       int so_error;
       socklen_t len = sizeof so_error;
-      
       getsockopt(socketfd, SOL_SOCKET, SO_ERROR, &so_error, &len);
       if (so_error == 0) {
           timedOut = false;
@@ -155,7 +152,7 @@ int main(int argc, char *argv[]){
           bool foundProtocol = getServerProtocols(socketfd, expected_protocol);
           if (NOT foundProtocol)
           {
-            printf("ERROR: NO PROTOCL FOUND\n");
+            printf("ERROR: NO PROTOCOL FOUND (TIMEOUT)\n");
             DEBUG_FUNCTION("Failed to get a protocol from server after %d checks\n", 2000);
             exitStatus = 1;
             goto freeMain;
@@ -169,7 +166,7 @@ int main(int argc, char *argv[]){
           }
           IF_NEGATIVE(getServerTask(socketfd, msg))
           {
-            printf("ERROR: COULD NOT SEND TASK TO SERVER\n");
+            printf("ERROR: COULD NOT SEND TASK TO SERVER (TIMEOUT)\n");
             DEBUG_FUNCTION("Could not get task from server %d\n", 0);
             exitStatus = 1;
             goto freeMain;
@@ -197,7 +194,7 @@ int main(int argc, char *argv[]){
     }
     else
     {
-      printf("ERROR: COULD NOT FIND A SERVER\n");
+      printf("ERROR: COULD NOT FIND A SERVER (TIMEOUT)\n");
       DEBUG_FUNCTION("Found no server to connect to on ip %s.\n", destination);
       exitStatus = 1;
     }
