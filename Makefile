@@ -37,7 +37,7 @@ test_client_object: client
 	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_netparser.o -c $(TEST_DIR)/client/testNetparser.cpp 
 
 test_server_object: server
-	$(CXX) $(CXXFLAGS) -c $(TEST_DIR)/server/*.cpp 
+	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_task.o -c $(TEST_DIR)/server/testTask.cpp 
 
 tests: test_client_object test_server_object ## Compile all the tests
 	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_suit.o -c $(TEST_DIR)/test.cpp 
