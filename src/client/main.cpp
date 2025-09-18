@@ -51,7 +51,7 @@ enum op stringToOp(char* input)
 
 void parseInputArgs(char *argv[], char protocolstring[6], char pathstring[7], char *&destination, char *&destinationPort)
 {
-  DEBUG_FUNCTION("client::main::parseInputArgs(%s)", argv[1]);
+  DEBUG_FUNCTION("client::main::parseInputArgs(%s)\n", argv[1]);
   getProtocol(argv[1], protocolstring);
   getAPI(argv[1], pathstring);
   for (int i = 0; i < 7; i++)
@@ -64,11 +64,12 @@ void parseInputArgs(char *argv[], char protocolstring[6], char pathstring[7], ch
 
 void populateTCPHint(addrinfo* hints)
 {
-  DEBUG_FUNCTION("client::main::populateTCPHint(%p)", hints);
+  DEBUG_FUNCTION("client::main::populateTCPHint(%p)\n", hints);
   memset(hints, 0, sizeof(*hints));
   hints->ai_family = AF_UNSPEC;
   hints->ai_protocol = IPPROTO_TCP;
   hints->ai_socktype = SOCK_STREAM;
+  hints->ai_flags = AI_PASSIVE;
 }
 
 void handleProtocol(bool foundProtocl, int socketfd, char pathstring[7], char protocolstring[6])
@@ -114,17 +115,28 @@ int main(int argc, char *argv[]){
     printf("ERROR");
     return returnValue;
   }
+  if (results==NULL)
+  {
+    printf("ERROR");
+    return 1;
+  }
 
   struct addrinfo *rp;
   int socketfd;
+  bool foundServer = false;
   for (rp = results; rp != NULL; rp = rp->ai_next) {
+    DEBUG_FUNCTION("Testing socket %p\n", rp);
     socketfd = socket(rp->ai_family, rp->ai_socktype,
                 rp->ai_protocol);
     if (socketfd == -1)
-        continue;
+    {
+      perror("Problem with the socket: ");
+      continue;
+    }
 
     if (connect(socketfd, rp->ai_addr, rp->ai_addrlen) == 0)
     {
+      foundServer = true;
       char expected_protocol[100];
       sprintf(expected_protocol, "%s %s 1.1\n", pathstring, protocolstring);
       char msg[1500];
@@ -139,10 +151,17 @@ int main(int argc, char *argv[]){
       break;
     }
   }
+  DEBUG_FUNCTION("Exiting socket lookup exit signal %d\n", foundServer);
   freeaddrinfo(results);
   close(socketfd);
   free(destination);
   free(destinationPort);
+  if (foundServer EQUALS false)
+  {
+    printf("ERROR\n");
+    DEBUG_FUNCTION("Found no server to connect to on ip %s.\n", destination);
+    return 1;
+  }
   return 0;
 }
 
