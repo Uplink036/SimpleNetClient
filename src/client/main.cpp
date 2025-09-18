@@ -14,6 +14,7 @@
 #include "macros.h"
 #include <ctype.h>
 #include "main.h"
+#include <netinet/tcp.h>
 
 void validate_input_args(int argc, char *argv[])
 {
@@ -69,7 +70,6 @@ void populateTCPHint(addrinfo* hints)
   hints->ai_family = AF_UNSPEC;
   hints->ai_protocol = IPPROTO_TCP;
   hints->ai_socktype = SOCK_STREAM;
-  hints->ai_flags = AI_PASSIVE;
 }
 
 void handleProtocol(bool foundProtocl, int socketfd, char pathstring[7], char protocolstring[6])
@@ -133,9 +133,12 @@ int main(int argc, char *argv[]){
       perror("Problem with the socket: ");
       continue;
     }
-
+    int synRetries = 2;
+    setsockopt(socketfd, IPPROTO_TCP, TCP_SYNCNT, &synRetries, sizeof(synRetries));
     if (connect(socketfd, rp->ai_addr, rp->ai_addrlen) == 0)
     {
+      DEBUG_FUNCTION("Testing connection %c\n", rp);
+      fflush(stdout);
       foundServer = true;
       char expected_protocol[100];
       sprintf(expected_protocol, "%s %s 1.1\n", pathstring, protocolstring);
@@ -247,7 +250,7 @@ bool getServerProtocols(int socketfd, char* expected_protocol)
     foundProtocl = true;
     DEBUG_FUNCTION("client::main::fromServer - Received - %s", msg);
   } while (msg[0] != '\n' AND loop < 2000);
-  if (strlen(msg) < 2);
+  if (strlen(msg) < 2)
   {
     printf("ERROR\n");
     DEBUG_FUNCTION("Failed to get a protocol from server after %d checks", loop);
