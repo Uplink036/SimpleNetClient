@@ -29,8 +29,8 @@ $(BUILD_DIR)/c_%.o : $(CLIENT_DIR)/%.cpp
 $(BUILD_DIR)/l_%.o : $(LIBRARY_DIR)/%.cpp
 	$(CXX) $(LIBFLAGS) -o $@ -c $^
 
-main.o: lib/main.cpp
-	$(CXX) $(CXXFLAGS) $(CFLAGS) -c lib/main.cpp -o $(BUILD_DIR)/main.o
+main.o: src/lib/main.cpp
+	$(CXX) $(CXXFLAGS) -Isrc/lib -c src/lib/main.cpp -o $(BUILD_DIR)/main.o
 
 test_client_object: client
 	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_ip.o -c $(TEST_DIR)/client/testIP.cpp 
@@ -47,7 +47,7 @@ tests: test_client_object test_server_object ## Compile all the tests
 		$(CXX) $(LD_FLAGS) -fsanitize=address -o tests.out $$FILES_TO_COMPILE -lcommon; \
 	}
 
-manual_test: main.o calcLib.o ## Compile a test file of calculations
+manual_test: main.o ## Compile a test file of calculations
 	$(CXX) $(LD_FLAGS) -o test.out $(BUILD_DIR)/main.o -lcommon
 
 client: $(CLIENT_OBJS) lib ## Compile the client file

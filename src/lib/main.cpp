@@ -4,7 +4,7 @@
 
 
 /* Include the calcLib header file, using <> as its a library and not just a object file we link.  */
-#include <calcLib.h>
+#include <calc.h>
 
 
 
@@ -26,8 +26,7 @@ int main(int argc, char *argv[]){
 
   /* Initialize the library, this is needed for this library. */
   initCalcLib();
-  char *ptr;
-  ptr=randomType(); // Get a random arithemtic operator. 
+  const char *ptr = randomType(); // Get a random arithemtic operator. 
 
   double f1,f2,fresult;
   int i1,i2,iresult;
