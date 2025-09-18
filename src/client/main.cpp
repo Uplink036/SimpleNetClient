@@ -92,7 +92,7 @@ int handleProtocol(bool foundProtocl, int socketfd, char pathstring[7], char pro
 
 int main(int argc, char *argv[]){
   validate_input_args(argc, argv);
-  
+  int exitStatus = 0;
   char protocolstring[6], pathstring[7];
   char* destination, *destinationPort;
   parseInputArgs(argv, protocolstring, pathstring, destination, destinationPort);
@@ -101,6 +101,8 @@ int main(int argc, char *argv[]){
   FD_ZERO(&fdset);
   tv.tv_sec = 5;
   tv.tv_usec = 0;
+  bool foundServer = false;
+  bool timedOut = true;
 
   addrinfo hints;
   populateTCPHint(&hints);
@@ -116,18 +118,18 @@ int main(int argc, char *argv[]){
   IF_NEGATIVE(returnValue)
   {
     printf("ERROR");
-    return returnValue;
+    exitStatus = 1;
+    goto freeMain;
   }
   if (results==NULL)
   {
     printf("ERROR");
-    return 1;
+    exitStatus = 1;
+    goto freeMain;
   }
 
   struct addrinfo *rp;
   int socketfd;
-  bool foundServer = false;
-  bool timedOut = true;
   for (rp = results; rp != NULL; rp = rp->ai_next) {
     DEBUG_FUNCTION("Testing socket %p\n", rp);
     socketfd = socket(rp->ai_family, rp->ai_socktype,
@@ -161,33 +163,36 @@ int main(int argc, char *argv[]){
           {
             printf("ERROR\n");
             DEBUG_FUNCTION("Failed to get a protocol from server after %d checks\n", 2000);
-            exit(EXIT_FAILURE);
+            exitStatus = 1;
+            goto freeMain;
           }
           IF_NEGATIVE(handleProtocol(foundProtocl, socketfd, pathstring, protocolstring))
           {
             printf("ERROR\n");
             DEBUG_FUNCTION("Could not send positive protocol to server %d\n", 0);
-            exit(EXIT_FAILURE);
+            exitStatus = 1;
+            goto freeMain;
           }
           IF_NEGATIVE(getServerTask(socketfd, msg))
           {
             printf("ERROR\n");
             DEBUG_FUNCTION("Could not get task from server %d\n", 0);
-            exit(EXIT_FAILURE);
+            exitStatus = 1;
+            goto freeMain;
           }
           int result = calculateServerTask(msg);
           IF_NEGATIVE(sendResultToServer(result, socketfd))
           {
             printf("ERROR\n");
             DEBUG_FUNCTION("Could not send result back to server %d\n", 0);
-            exit(EXIT_FAILURE);
+            exitStatus = 1;
+            goto freeMain;
           }
           getResultResponseBack(socketfd);
           break;
         }
     }
   }
-  int exitStatus = 0;
   if (timedOut EQUALS true)
   {
     printf("ERROR: MESSAGE LOST (TIMEOUT)\n");
@@ -200,11 +205,12 @@ int main(int argc, char *argv[]){
     DEBUG_FUNCTION("Found no server to connect to on ip %s.\n", destination);
     exitStatus = 1;
   }
+  freeMain:
   freeaddrinfo(results);
   close(socketfd);
   free(destination);
   free(destinationPort);
-  return 0;
+  return exitStatus;
 }
 
 void getResultResponseBack(int socketfd)
