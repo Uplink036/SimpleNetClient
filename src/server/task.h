@@ -15,14 +15,6 @@
 #include "debug.h"
 #include "macros.h"
 
-enum op
-{
-    ADD,
-    DIV,
-    MUL, 
-    SUB
-};
-
 struct STask
 {
     op opID;

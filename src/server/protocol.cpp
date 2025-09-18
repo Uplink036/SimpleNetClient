@@ -19,7 +19,7 @@ bool sendServerProtocol(int client_fd)
       return false;
     }
   }
-  while (strcmp(SERVER_PROTOCOLS[protocol_index++], "\n") == 0);
+  while (strcmp(SERVER_PROTOCOLS[protocol_index++], "\n") != 0);
   return true;
 }
 
@@ -39,7 +39,7 @@ bool getClientProtocol(int client_fd, ApplicationProtocl* clientProtocol)
 
   IF_ZERO(strcmp(msg, "\n"))
   {
-      perror("protocol type");
+      perror("wrong protocol type");
       close(client_fd);
       return false;
   }

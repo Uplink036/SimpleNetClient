@@ -7,7 +7,7 @@ TEST_DIR 	  = ./tests
 BUILD_DIR     = ./build
 
 CLIENT_DIR    = $(SRC_DIR)/client
-CLIENT_OBJ    = c_main.o
+CLIENT_OBJ    = c_main.o c_netparser.o
 CLIENT_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(CLIENT_OBJ))
 
 SERVER_DIR    = $(SRC_DIR)/server
@@ -33,10 +33,11 @@ main.o: lib/main.cpp
 	$(CXX) $(CXXFLAGS) $(CFLAGS) -c lib/main.cpp -o $(BUILD_DIR)/main.o
 
 test_client_object: client
-	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_client.o -c $(TEST_DIR)/client/*.cpp 
+	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_ip.o -c $(TEST_DIR)/client/testIP.cpp 
+	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_netparser.o -c $(TEST_DIR)/client/testNetparser.cpp 
 
 test_server_object: server
-	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_server.o -c $(TEST_DIR)/server/*.cpp 
+	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_task.o -c $(TEST_DIR)/server/testTask.cpp 
 
 tests: test_client_object test_server_object ## Compile all the tests
 	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/t_suit.o -c $(TEST_DIR)/test.cpp 
