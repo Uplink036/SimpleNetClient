@@ -144,12 +144,12 @@ int main(int argc, char *argv[]){
 
     if (select(socketfd + 1, NULL, &fdset, NULL, &tv) == 1)
     {
-        timedOut = false;
-        int so_error;
-        socklen_t len = sizeof so_error;
-
-        getsockopt(socketfd, SOL_SOCKET, SO_ERROR, &so_error, &len);
-        if (so_error == 0) {
+      int so_error;
+      socklen_t len = sizeof so_error;
+      
+      getsockopt(socketfd, SOL_SOCKET, SO_ERROR, &so_error, &len);
+      if (so_error == 0) {
+          timedOut = false;
           DEBUG_FUNCTION("Testing connection %c\n", rp);
           fflush(stdout);
           foundServer = true;
@@ -188,15 +188,15 @@ int main(int argc, char *argv[]){
     }
   }
   int exitStatus = 0;
-  if (foundServer EQUALS false)
-  {
-    printf("ERROR\n");
-    DEBUG_FUNCTION("Found no server to connect to on ip %s.\n", destination);
-    exitStatus = 1;
-  }
   if (timedOut EQUALS true)
   {
     printf("ERROR: MESSAGE LOST (TIMEOUT)\n");
+    DEBUG_FUNCTION("Found no server to connect to on ip %s.\n", destination);
+    exitStatus = 1;
+  }
+  else if (foundServer EQUALS false)
+  {
+    printf("ERROR\n");
     DEBUG_FUNCTION("Found no server to connect to on ip %s.\n", destination);
     exitStatus = 1;
   }
