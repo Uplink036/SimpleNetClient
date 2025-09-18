@@ -101,7 +101,7 @@ int main(int argc, char *argv[]){
   populateTCPHint(&hints);
 
   addrinfo* results;
-  DEBUG_FUNCTION("Host %s, and port %s.\n",destination, destinationPort);
+  printf("Host %s, and port %s.\n",destination, destinationPort);
   int returnValue = getaddrinfo(
     destination,
     destinationPort,
@@ -109,7 +109,10 @@ int main(int argc, char *argv[]){
     &results
   );
   IF_NEGATIVE(returnValue)
+  {
+    printf("ERROR");
     return returnValue;
+  }
 
   struct addrinfo *rp;
   int socketfd;
