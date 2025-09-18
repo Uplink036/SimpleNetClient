@@ -129,11 +129,13 @@ int main(int argc, char *argv[]){
       perror("Problem with the socket: ");
       continue;
     }
+    int flags = fcntl(socketfd, F_GETFL);
     fcntl(socketfd, F_SETFL, O_NONBLOCK);
     connect(socketfd,  rp->ai_addr, rp->ai_addrlen);
     FD_SET(socketfd, &fdset);
     if (select(socketfd + 1, NULL, &fdset, NULL, &tv) == 1)
     {
+      fcntl(socketfd, F_SETFL, flags & ~O_NONBLOCK);
       int so_error;
       socklen_t len = sizeof so_error;
       getsockopt(socketfd, SOL_SOCKET, SO_ERROR, &so_error, &len);
@@ -280,13 +282,17 @@ bool getServerProtocols(int socketfd, char* expected_protocol)
     memset(msg, 0, 1500);
     DEBUG_FUNCTION("client::main::fromServer - Waiting %d\n", loop++);
     int readSize = recv(socketfd, &msg, max_buffer_size, 0);
-    IF_NEGATIVE(readSize)
-    return false;
-    if (strcmp(msg, expected_protocol))
-      foundProtocl = true;
     DEBUG_FUNCTION("client::main::fromServer - Received - %s", msg);
+    IF_NEGATIVE(readSize)
+      return false;
+    DEBUG_FUNCTION("client::main::fromServer - Looking for - %s", expected_protocol);
+    if (strstr(msg, expected_protocol) NOTEQUALS NULL)
+    {
+      foundProtocl = true;
+      break;
+    }
   } while (msg[0] != '\n' AND loop < 2000);
-  DEBUG_FUNCTION("Got task %s", msg);
+  DEBUG_FUNCTION("Got task %s ", msg);
   fflush(stdout);
   return foundProtocl;
 }
