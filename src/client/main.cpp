@@ -15,6 +15,7 @@
 #include <ctype.h>
 #include "main.h"
 #include <netinet/tcp.h>
+#include <fcntl.h>
 
 void validate_input_args(int argc, char *argv[])
 {
@@ -98,6 +99,11 @@ int main(int argc, char *argv[]){
   char protocolstring[6], pathstring[7];
   char* destination, *destinationPort;
   parseInputArgs(argv, protocolstring, pathstring, destination, destinationPort);
+  fd_set fdset;
+  struct timeval tv;
+  FD_ZERO(&fdset);
+  tv.tv_sec = 5;
+  tv.tv_usec = 0;
 
   addrinfo hints;
   populateTCPHint(&hints);
@@ -133,25 +139,34 @@ int main(int argc, char *argv[]){
       perror("Problem with the socket: ");
       continue;
     }
-    int synRetries = 2;
-    setsockopt(socketfd, IPPROTO_TCP, TCP_SYNCNT, &synRetries, sizeof(synRetries));
-    if (connect(socketfd, rp->ai_addr, rp->ai_addrlen) == 0)
+    fcntl(socketfd, F_SETFL, O_NONBLOCK);
+
+    connect(socketfd,  rp->ai_addr, rp->ai_addrlen);
+    FD_SET(socketfd, &fdset);
+
+    if (select(socketfd + 1, NULL, &fdset, NULL, &tv) == 1)
     {
-      DEBUG_FUNCTION("Testing connection %c\n", rp);
-      fflush(stdout);
-      foundServer = true;
-      char expected_protocol[100];
-      sprintf(expected_protocol, "%s %s 1.1\n", pathstring, protocolstring);
-      char msg[1500];
-      bool foundProtocl = getServerProtocols(socketfd, expected_protocol);
-      if (NOT foundProtocl)
-        break;
-      handleProtocol(foundProtocl, socketfd, pathstring, protocolstring);
-      getServerTask(socketfd, msg);
-      int result = calculateServerTask(msg);
-      sendResultToServer(result, socketfd);
-      getResultResponseBack(socketfd);
-      break;
+        int so_error;
+        socklen_t len = sizeof so_error;
+
+        getsockopt(socketfd, SOL_SOCKET, SO_ERROR, &so_error, &len);
+        if (so_error == 0) {
+          DEBUG_FUNCTION("Testing connection %c\n", rp);
+          fflush(stdout);
+          foundServer = true;
+          char expected_protocol[100];
+          sprintf(expected_protocol, "%s %s 1.1\n", pathstring, protocolstring);
+          char msg[1500];
+          bool foundProtocl = getServerProtocols(socketfd, expected_protocol);
+          if (NOT foundProtocl)
+            break;
+          handleProtocol(foundProtocl, socketfd, pathstring, protocolstring);
+          getServerTask(socketfd, msg);
+          int result = calculateServerTask(msg);
+          sendResultToServer(result, socketfd);
+          getResultResponseBack(socketfd);
+          break;
+        }
     }
   }
   DEBUG_FUNCTION("Exiting socket lookup exit signal %d\n", foundServer);
