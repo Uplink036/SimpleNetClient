@@ -1,21 +1,4 @@
-#include <unistd.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <cmath>
-#include "ip.h"
-#include "debug.h"
-#include "calc.h"
-#include "netparser.h"
-#include "macros.h"
-#include <ctype.h>
 #include "main.h"
-#include <netinet/tcp.h>
-#include <fcntl.h>
 
 void validate_input_args(int argc, char *argv[])
 {
@@ -135,7 +118,6 @@ int main(int argc, char *argv[]){
     FD_SET(socketfd, &fdset);
     if (select(socketfd + 1, NULL, &fdset, NULL, &tv) == 1)
     {
-      fcntl(socketfd, F_SETFL, flags & ~O_NONBLOCK);
       int so_error;
       socklen_t len = sizeof so_error;
       getsockopt(socketfd, SOL_SOCKET, SO_ERROR, &so_error, &len);
@@ -147,7 +129,7 @@ int main(int argc, char *argv[]){
           char expected_protocol[100];
           sprintf(expected_protocol, "%s %s 1.1\n", pathstring, protocolstring);
           char msg[1500];
-          bool foundProtocol = getServerProtocols(socketfd, expected_protocol);
+          bool foundProtocol = getServerProtocols(socketfd, expected_protocol, &fdset, &tv);
           if (NOT foundProtocol)
           {
             printf("ERROR: NO PROTOCOL FOUND (TIMEOUT)\n");
@@ -155,6 +137,7 @@ int main(int argc, char *argv[]){
             exitStatus = 1;
             goto freeMain;
           }
+          fcntl(socketfd, F_SETFL, flags & ~O_NONBLOCK);
           IF_NEGATIVE(handleProtocol(foundProtocol, socketfd, pathstring, protocolstring))
           {
             printf("ERROR: COULD NOT SEND PROTOCOL OK\n");
@@ -270,7 +253,7 @@ int getServerTask(int socketfd, char* msg)
   return readSize;
 }
 
-bool getServerProtocols(int socketfd, char* expected_protocol)
+bool getServerProtocols(int socketfd, char* expected_protocol, fd_set* fdset, timeval* tv)
 {
   DEBUG_FUNCTION("client::main::getServerProtocols(%d, ...)\n", socketfd);
   bool foundProtocl = false;
@@ -282,14 +265,24 @@ bool getServerProtocols(int socketfd, char* expected_protocol)
     memset(msg, 0, 1500);
     DEBUG_FUNCTION("client::main::fromServer - Waiting %d\n", loop++);
     int readSize = recv(socketfd, &msg, max_buffer_size, 0);
-    DEBUG_FUNCTION("client::main::fromServer - Received - %s", msg);
-    IF_NEGATIVE(readSize)
-      return false;
-    DEBUG_FUNCTION("client::main::fromServer - Looking for - %s", expected_protocol);
-    if (strstr(msg, expected_protocol) NOTEQUALS NULL)
+    if (select(socketfd + 1, fdset, NULL, NULL, tv) == 1)
     {
-      foundProtocl = true;
-      break;
+        int so_error;
+        socklen_t len = sizeof so_error;
+        getsockopt(socketfd, SOL_SOCKET, SO_ERROR, &so_error, &len);
+        if (so_error == 0) 
+        {
+          int readSize = recv(socketfd, &msg, max_buffer_size, 0);
+          DEBUG_FUNCTION("client::main::fromServer - Received %d bytes = %s", readSize, msg);
+          IF_NEGATIVE(readSize)
+            return false;
+          DEBUG_FUNCTION("client::main::fromServer - Looking for - %s", expected_protocol);
+          if (strstr(msg, expected_protocol) NOTEQUALS NULL)
+          {
+            foundProtocl = true;
+            break;
+          }
+        }
     }
   } while (msg[0] != '\n' AND loop < 2000);
   DEBUG_FUNCTION("Got task %s ", msg);
