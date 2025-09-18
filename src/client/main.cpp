@@ -199,7 +199,7 @@ void getResultResponseBack(int socketfd, int result)
   static const int max_buffer_size = sizeof(msg)-1;
   recv(socketfd, &msg, max_buffer_size, 0);
   if (strcmp(msg, "OK\n") == 0)
-    printf("OK myresult=%d\n", result);
+    printf("OK (myresult=%d)\n", result);
   else
     printf("Fail myresult=%d, server response %s", result, msg);
 }
