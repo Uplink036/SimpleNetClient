@@ -115,15 +115,9 @@ int main(int argc, char *argv[]){
     &hints,
     &results
   );
-  IF_NEGATIVE(returnValue)
+  if (results==NULL OR returnValue < 0)
   {
-    printf("ERROR");
-    exitStatus = 1;
-    goto freeMain;
-  }
-  if (results==NULL)
-  {
-    printf("ERROR");
+    printf("ERROR:");
     exitStatus = 1;
     goto freeMain;
   }
@@ -158,24 +152,24 @@ int main(int argc, char *argv[]){
           char expected_protocol[100];
           sprintf(expected_protocol, "%s %s 1.1\n", pathstring, protocolstring);
           char msg[1500];
-          bool foundProtocl = getServerProtocols(socketfd, expected_protocol);
-          if (NOT foundProtocl)
+          bool foundProtocol = getServerProtocols(socketfd, expected_protocol);
+          if (NOT foundProtocol)
           {
-            printf("ERROR\n");
+            printf("ERROR: NO PROTOCL FOUND\n");
             DEBUG_FUNCTION("Failed to get a protocol from server after %d checks\n", 2000);
             exitStatus = 1;
             goto freeMain;
           }
-          IF_NEGATIVE(handleProtocol(foundProtocl, socketfd, pathstring, protocolstring))
+          IF_NEGATIVE(handleProtocol(foundProtocol, socketfd, pathstring, protocolstring))
           {
-            printf("ERROR\n");
+            printf("ERROR: COULD NOT SEND PROTOCOL OK\n");
             DEBUG_FUNCTION("Could not send positive protocol to server %d\n", 0);
             exitStatus = 1;
             goto freeMain;
           }
           IF_NEGATIVE(getServerTask(socketfd, msg))
           {
-            printf("ERROR\n");
+            printf("ERROR: COULD NOT SEND TASK TO SERVER\n");
             DEBUG_FUNCTION("Could not get task from server %d\n", 0);
             exitStatus = 1;
             goto freeMain;
@@ -183,7 +177,7 @@ int main(int argc, char *argv[]){
           int result = calculateServerTask(msg);
           IF_NEGATIVE(sendResultToServer(result, socketfd))
           {
-            printf("ERROR\n");
+            printf("ERROR: COULD NOT SEND RESULT BACK TO SERVER\n");
             DEBUG_FUNCTION("Could not send result back to server %d\n", 0);
             exitStatus = 1;
             goto freeMain;
@@ -193,17 +187,20 @@ int main(int argc, char *argv[]){
         }
     }
   }
-  if (timedOut EQUALS true)
+  if (foundServer EQUALS false)
   {
-    printf("ERROR: MESSAGE LOST (TIMEOUT)\n");
-    DEBUG_FUNCTION("Found no server to connect to on ip %s.\n", destination);
-    exitStatus = 1;
-  }
-  else if (foundServer EQUALS false)
-  {
-    printf("ERROR\n");
-    DEBUG_FUNCTION("Found no server to connect to on ip %s.\n", destination);
-    exitStatus = 1;
+    if (timedOut EQUALS true)
+    {
+      printf("ERROR: MESSAGE LOST (TIMEOUT)\n");
+      DEBUG_FUNCTION("Found no server to connect to on ip %s.\n", destination);
+      exitStatus = 1;
+    }
+    else
+    {
+      printf("ERROR: COULD NOT FIND A SERVER\n");
+      DEBUG_FUNCTION("Found no server to connect to on ip %s.\n", destination);
+      exitStatus = 1;
+    }
   }
   freeMain:
   freeaddrinfo(results);
