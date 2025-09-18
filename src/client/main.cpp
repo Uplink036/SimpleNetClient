@@ -78,7 +78,7 @@ int main(int argc, char *argv[]){
   fd_set fdset;
   struct timeval tv;
   FD_ZERO(&fdset);
-  tv.tv_sec = 5;
+  tv.tv_sec = 2;
   tv.tv_usec = 0;
   bool foundServer = false;
   bool timedOut = true;
@@ -164,6 +164,8 @@ int main(int argc, char *argv[]){
           break;
         }
     }
+    else
+      break;
   }
   if (foundServer EQUALS false)
   {
@@ -181,6 +183,7 @@ int main(int argc, char *argv[]){
     }
   }
   freeMain:
+  fflush(stdout);
   freeaddrinfo(results);
   close(socketfd);
   free(destination);
@@ -284,6 +287,8 @@ bool getServerProtocols(int socketfd, char* expected_protocol, fd_set* fdset, ti
           }
         }
     }
+    else
+      break;
   } while (msg[0] != '\n' AND loop < 2000);
   DEBUG_FUNCTION("Got task %s ", msg);
   fflush(stdout);
