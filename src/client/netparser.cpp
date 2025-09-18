@@ -1,12 +1,15 @@
 #include "netparser.h"
 
-
 void getProtocol(char* input, char* protocol)
 {
     DEBUG_FUNCTION("client::netparser::getProtocol(%s, %p)\n", input, protocol);
     char *proto_end = strstr(input, "://");
     strncpy(protocol, input, proto_end - input);
     protocol[proto_end - input] = '\0';
+    for (int i = 0; i < proto_end - input; i++)
+    {
+        protocol[i] = toupper(protocol[i]);
+    }
 }
 
 void getAPI(char* input, char* api)
@@ -19,6 +22,10 @@ void getAPI(char* input, char* api)
     memset(api, 0, apiLength+1);
     strncpy(api, api_start, apiLength);
     DEBUG_FUNCTION("client::netparser::getAPI - %s %s %d\n", api, api_start, apiLength);
+    for (int i = 0; i < apiLength; i++)
+    {
+        api[i] = toupper(api[i]);
+    }
 }
 
 void getIPnPORT(char* input, char** ip, char** port)

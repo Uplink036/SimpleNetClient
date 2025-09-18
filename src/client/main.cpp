@@ -56,10 +56,6 @@ void parseInputArgs(char *argv[], char protocolstring[6], char pathstring[7], ch
   DEBUG_FUNCTION("client::main::parseInputArgs(%s)\n", argv[1]);
   getProtocol(argv[1], protocolstring);
   getAPI(argv[1], pathstring);
-  for (int i = 0; i < 7; i++)
-  {
-    pathstring[i] = toupper(pathstring[i]);
-  }
   getIPnPORT(argv[1], &destination, &destinationPort);
 }
 

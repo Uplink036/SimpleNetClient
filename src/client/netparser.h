@@ -3,7 +3,10 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "ip.h"
+
+
 
 
 void getProtocol(char* input, char* protocol);
