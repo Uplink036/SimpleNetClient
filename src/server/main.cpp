@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <server.h>
 
-void validate_input_args(int argc, char *argv[])
+void validateInputArgs(int argc, char *argv[])
 {
-  DEBUG_FUNCTION("server::main::validate_input_args(&d, ...)\n", argc);
+  DEBUG_FUNCTION("server::main::validateInputArgs(&d, ...)\n", argc);
   if (argc != 2)
   {
     printf("Unexpected amount of inputs, expected [<PROGRAM>] [<PORT>], got %d arguments\n", argc);
@@ -19,7 +19,7 @@ void validate_input_args(int argc, char *argv[])
 }
 
 int main(int argc, char *argv[]){
-  validate_input_args(argc, argv);
+  validateInputArgs(argc, argv);
 
   int socket_fd;
   addrinfo* serverIP;
