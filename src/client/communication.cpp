@@ -49,6 +49,23 @@ bool getServerProtocols(int socketfd, char* expected_protocol, fd_set* fdset, ti
   return foundProtocl;
 }
 
+int sendClientProtocol(bool foundProtocl, int socketfd, char pathstring[7], char protocolstring[6])
+{
+  DEBUG_FUNCTION("client::main::sendClientProtocol(%d, %d, %s, %s)\n", \
+                  foundProtocl, socketfd, pathstring, protocolstring );
+  if (NOT foundProtocl)
+  {
+    char errorMessage[] = "ERROR\n";
+    return send(socketfd, errorMessage, strlen(errorMessage), 0);
+  }
+  else
+  {
+    char successMessage[100];
+    sprintf(successMessage, "%s %s 1.1 OK\n", pathstring, protocolstring);
+    return send(socketfd, successMessage, strlen(successMessage), 0);
+  }
+}
+
 int sendResultToServer(int result, int socketfd)
 {
   DEBUG_FUNCTION("client::main::sendResultToServer(%d, %d)\n", result, socketfd);

@@ -1,40 +1,5 @@
 #include "main.h"
 
-enum op stringToOp(char* input)
-{
-  DEBUG_FUNCTION("client::main::stringToOp(%s)", input);
-  IF_ZERO(strcmp("add", input))
-    return op::ADD;
-  IF_ZERO(strcmp("sub", input))
-    return op::SUB;
-  IF_ZERO(strcmp("mul", input))
-    return op::MUL;
-  IF_ZERO(strcmp("div", input))
-    return op::DIV;
-  printf("ERROR: GOT UNEXPECTED OP COMMAND\n");
-  DEBUG_FUNCTION("ERROR - %s is not a defined op", input);
-  exit(EXIT_FAILURE);
-}
-
-
-
-
-int handleProtocol(bool foundProtocl, int socketfd, char pathstring[7], char protocolstring[6])
-{
-  DEBUG_FUNCTION("client::main::handleProtocol(%d, %d, %s, %s)\n", \
-                  foundProtocl, socketfd, pathstring, protocolstring );
-  if (NOT foundProtocl)
-  {
-    char errorMessage[] = "ERROR\n";
-    return send(socketfd, errorMessage, strlen(errorMessage), 0);
-  }
-  else
-  {
-    char successMessage[100];
-    sprintf(successMessage, "%s %s 1.1 OK\n", pathstring, protocolstring);
-    return send(socketfd, successMessage, strlen(successMessage), 0);
-  }
-}
 
 int main(int argc, char *argv[]){
   validateInputArgs(argc, argv);
@@ -104,7 +69,7 @@ int main(int argc, char *argv[]){
             goto freeMain;
           }
           fcntl(socketfd, F_SETFL, flags & ~O_NONBLOCK);
-          IF_NEGATIVE(handleProtocol(foundProtocol, socketfd, pathstring, protocolstring))
+          IF_NEGATIVE(sendClientProtocol(foundProtocol, socketfd, pathstring, protocolstring))
           {
             printf("ERROR: COULD NOT SEND PROTOCOL OK\n");
             DEBUG_FUNCTION("Could not send positive protocol to server %d\n", 0);
@@ -156,43 +121,4 @@ int main(int argc, char *argv[]){
   free(destination);
   free(destinationPort);
   return exitStatus;
-}
-
-
-
-
-int calculateServerTask(char* msg)
-{
-  DEBUG_FUNCTION("client::main::calculateServerTask(%s)\n", msg);
-  char operation[10];
-  int valueOne, valueTwo;
-  IF_NEGATIVE(sscanf(msg, "%s %d %d", operation, &valueOne, &valueTwo))
-  {
-    printf("ERROR\n");
-    DEBUG_FUNCTION("Could not properly read scaned values - %s", msg);
-    exit(EXIT_FAILURE);
-  }    
-  printf("ASSIGNMENT: %s %d %d\n", operation, valueOne, valueTwo);
-  int result;
-  double temp;
-  switch (stringToOp(operation))
-  {
-  case op::ADD:
-      result = valueOne + valueTwo;
-      break;
-  case op::SUB:
-      result = valueOne - valueTwo;
-      break;
-  case op::MUL:
-      result = valueOne * valueTwo;
-      break;
-  case op::DIV:
-      temp = valueOne / valueTwo;
-      result = round(temp);
-      break;
-  default:
-    break;
-  }
-  DEBUG_FUNCTION("Calculated %d\n", result);
-  return result;
 }

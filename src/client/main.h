@@ -22,7 +22,7 @@
 #include "argParse.h"
 #include "networkSetup.h"
 
-int handleProtocol(bool foundProtocl, int socketfd, char pathstring[7], char protocolstring[6]);
+int sendClientProtocol(bool foundProtocl, int socketfd, char pathstring[7], char protocolstring[6]);
 int calculateServerTask(char* msg);
 
 #endif

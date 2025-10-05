@@ -19,6 +19,7 @@
 
 int getServerTask(int socketfd, char* msg);
 bool getServerProtocols(int socketfd, char* expected_protocol, fd_set* fdset, timeval* tv);
+int sendClientProtocol(bool foundProtocl, int socketfd, char pathstring[7], char protocolstring[6]);
 int sendResultToServer(int result, int socketfd);
 void getResultResponseBack(int socketfd, int result);
 

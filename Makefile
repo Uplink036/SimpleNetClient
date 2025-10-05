@@ -7,7 +7,7 @@ TEST_DIR 	  = ./tests
 BUILD_DIR     = ./build
 
 CLIENT_DIR    = $(SRC_DIR)/client
-CLIENT_OBJ    = c_main.o c_netparser.o
+CLIENT_OBJ    = c_main.o c_netparser.o c_communication.o c_argParse.o c_networkSetup.o c_calculateTask.o
 CLIENT_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(CLIENT_OBJ))
 
 SERVER_DIR    = $(SRC_DIR)/server
