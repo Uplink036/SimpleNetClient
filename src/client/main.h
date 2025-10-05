@@ -10,15 +10,15 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <cmath>
+#include <ctype.h>
+#include <netinet/tcp.h>
+#include <fcntl.h>
 #include "ip.h"
 #include "debug.h"
 #include "calc.h"
 #include "netparser.h"
 #include "macros.h"
-#include <ctype.h>
-#include <netinet/tcp.h>
-#include <fcntl.h>
-
+#include "communication.h"
 
 void parseInputArgs(char *argv[], char protocolstring[6], char pathstring[7], char *&destination, char *&destinationPort);
 void populateTCPHint(addrinfo *hints);
