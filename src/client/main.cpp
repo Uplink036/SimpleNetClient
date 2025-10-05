@@ -1,23 +1,5 @@
 #include "main.h"
 
-void validate_input_args(int argc, char *argv[])
-{
-  DEBUG_FUNCTION("client::main::validate_input_args(%d, ...)\n", argc);
-  if (argc != 2)
-  {
-    printf("Unexpected amount of inputs, expected [<PROGRAM>] [<DNS|IPv4|IPv6>:<PORT>], got %d arguments\n", argc);
-    exit(-1);
-  }
-  if (strstr(argv[1], "///") != NULL ){
-    printf("Invalid format: %s.\n", argv[1]);
-    exit(-1); 
-  }
-  if (strstr(argv[1], "://") == NULL) {
-    printf("Invalid format: missing '://'\n");
-    exit(-1);
-  }
-}
-
 enum op stringToOp(char* input)
 {
   DEBUG_FUNCTION("client::main::stringToOp(%s)", input);
@@ -34,13 +16,6 @@ enum op stringToOp(char* input)
   exit(EXIT_FAILURE);
 }
 
-void parseInputArgs(char *argv[], char protocolstring[6], char pathstring[7], char *&destination, char *&destinationPort)
-{
-  DEBUG_FUNCTION("client::main::parseInputArgs(%s)\n", argv[1]);
-  getProtocol(argv[1], protocolstring);
-  getAPI(argv[1], pathstring);
-  getIPnPORT(argv[1], &destination, &destinationPort);
-}
 
 
 void populateTCPHint(addrinfo* hints)
@@ -70,7 +45,7 @@ int handleProtocol(bool foundProtocl, int socketfd, char pathstring[7], char pro
 }
 
 int main(int argc, char *argv[]){
-  validate_input_args(argc, argv);
+  validateInputArgs(argc, argv);
   int exitStatus = 0;
   char protocolstring[6], pathstring[7];
   char* destination, *destinationPort;

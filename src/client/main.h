@@ -19,6 +19,7 @@
 #include "netparser.h"
 #include "macros.h"
 #include "communication.h"
+#include "argParse.h"
 
 void parseInputArgs(char *argv[], char protocolstring[6], char pathstring[7], char *&destination, char *&destinationPort);
 void populateTCPHint(addrinfo *hints);
