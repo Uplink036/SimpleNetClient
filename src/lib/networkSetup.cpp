@@ -1,7 +1,6 @@
-#include "networkSetup.h"
+#include "src/lib/networkSetup.h"
 
-void populateTCPHint(addrinfo* hints)
-{
+void populateTCPHint(addrinfo* hints) {
   DEBUG_FUNCTION("client::main::populateTCPHint(%p)\n", hints);
   memset(hints, 0, sizeof(*hints));
   hints->ai_family = AF_UNSPEC;
