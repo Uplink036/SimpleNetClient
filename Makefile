@@ -1,4 +1,4 @@
-CXXFLAGS      = -Wall -Isrc -Isrc/lib -Isrc/client -Isrc/server -g
+CXXFLAGS      = -Wall -I. -g
 LIBFLAGS      = -fPIC $(CXXFLAGS)
 LD_FLAGS      = -Wall -L./ 
 
