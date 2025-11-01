@@ -6,17 +6,17 @@ SRC_DIR       = ./src
 TEST_DIR 	  = ./tests
 BUILD_DIR     = ./build
 
-CLIENT_DIR    = $(SRC_DIR)/client
-CLIENT_OBJ    = c_main.o c_netparser.o c_communication.o c_argParse.o c_calculateTask.o
-CLIENT_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(CLIENT_OBJ))
+CLIENT_DIR    		= $(SRC_DIR)/client
+CLIENT_OBJS	  		= $(patsubst %.cpp,%.o,$(wildcard $(CLIENT_DIR)/*.cpp))
+CLIENT_BUILD_OBJS   = $(patsubst $(CLIENT_DIR)/%,$(BUILD_DIR)/c_%,$(CLIENT_OBJS))
 
-SERVER_DIR    = $(SRC_DIR)/server
-SERVER_OBJ    = s_main.o s_task.o s_server.o s_protocol.o
-SERVER_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(SERVER_OBJ))
+SERVER_DIR    		= $(SRC_DIR)/server
+SERVER_OBJS	  		= $(patsubst %.cpp,%.o,$(wildcard $(SERVER_DIR)/*.cpp))
+SERVER_BUILD_OBJS   = $(patsubst $(SERVER_DIR)/%,$(BUILD_DIR)/s_%,$(SERVER_OBJS))
 
-LIBRARY_DIR   = $(SRC_DIR)/lib
-LIBRARY_OBJ    = l_ip.o l_calc.o l_networkSetup.o 
-LIBRARY_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(LIBRARY_OBJ))
+LIBRARY_DIR   		= $(SRC_DIR)/lib
+LIBRARY_OBJS	    = $(patsubst %.cpp,%.o,$(wildcard $(LIBRARY_DIR)/*.cpp))
+LIBRARY_BUILD_OBJS  = $(patsubst $(LIBRARY_DIR)/%,$(BUILD_DIR)/l_%,$(LIBRARY_OBJS))
 
 all: libcalc manual_test client server ## Compile everything
 
@@ -50,13 +50,13 @@ tests: test_client_object test_server_object ## Compile all the tests
 manual_test: main.o ## Compile a test file of calculations
 	$(CXX) $(LD_FLAGS) -o test $(BUILD_DIR)/main.o -lcommon
 
-client: $(CLIENT_OBJS) lib ## Compile the client file
+client: $(CLIENT_BUILD_OBJS) lib ## Compile the client file
 	$(CXX) $(LD_FLAGS) -o client $(BUILD_DIR)/c_*.o -lcommon
 
-server: $(SERVER_OBJS) lib ## Compile the server file
+server: $(SERVER_BUILD_OBJS) lib ## Compile the server file
 	$(CXX) $(LD_FLAGS) -o server $(BUILD_DIR)/s_*.o -lcommon
 
-lib: $(LIBRARY_OBJS) ## Generate the calc lib file (is needed)
+lib: $(LIBRARY_BUILD_OBJS) ## Generate the calc lib file (is needed)
 	ar -rc libcommon.a -o $(BUILD_DIR)/l_*.o
 
 libcalc: lib ## Generate the calc lib file (is needed)
