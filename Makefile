@@ -61,6 +61,9 @@ lib: $(LIBRARY_BUILD_OBJS) ## Generate the calc lib file (is needed)
 
 libcalc: lib ## Generate the calc lib file (is needed)
 
+lint: ## Run CPP lint
+	cpplint --recursive src/
+
 clean: ## Clean generated files
 	rm -f *.o  build/*.o
 	rm -f *.a *.out
