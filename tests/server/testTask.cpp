@@ -1,11 +1,11 @@
-#include <task.h>
-#include <boost/test/unit_test.hpp>
+#include <src/server/task.h>
 #include <cmath>
+#include <string>
+#include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_SUITE( TestTaskSuit )
+BOOST_AUTO_TEST_SUITE(TestTaskSuit)
 
-BOOST_AUTO_TEST_CASE( testTaskCorrectIntervalValues)
-{
+BOOST_AUTO_TEST_CASE(testTaskCorrectIntervalValues) {
     STask* task = getRandomTask();
     BOOST_TEST((task->opID >= 0 && task->opID < 4));
     BOOST_TEST((task->valueOne >= 0 && task->valueOne < 100));
