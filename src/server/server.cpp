@@ -1,14 +1,5 @@
 #include <server.h>
 
-void populateTCPHint(addrinfo* hints)
-{
-  DEBUG_FUNCTION("server::main::populateTCPHint(%p)\n", hints);
-  memset(hints, 0, sizeof(addrinfo));
-  hints->ai_family = AF_UNSPEC;
-  hints->ai_protocol = IPPROTO_TCP;
-  hints->ai_socktype = SOCK_STREAM;
-}
-
 void listenOnPort(int socket_fd, addrinfo* serverIP)
 {
   DEBUG_FUNCTION("server::main::listenOnPort(%d, %p)\n", socket_fd, serverIP);

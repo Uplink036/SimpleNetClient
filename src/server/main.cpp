@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <server.h>
+#include "server.h"
 
 void validateInputArgs(int argc, char *argv[])
 {

@@ -16,11 +16,11 @@
 #include "macros.h"
 #include "protocol.h"
 #include "task.h"
+#include "networkSetup.h"
 
 #define MAX_PENDING_CONNECTIONS 2
 #define MAX_MESSGE_SIZE 1500
 
-void populateTCPHint(addrinfo* hints);
 void listenOnPort(int socket_fd, addrinfo* serverIP);
 int bindPort(char* desiredPort, addrinfo** selectedIP);
 

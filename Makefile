@@ -7,7 +7,7 @@ TEST_DIR 	  = ./tests
 BUILD_DIR     = ./build
 
 CLIENT_DIR    = $(SRC_DIR)/client
-CLIENT_OBJ    = c_main.o c_netparser.o c_communication.o c_argParse.o c_networkSetup.o c_calculateTask.o
+CLIENT_OBJ    = c_main.o c_netparser.o c_communication.o c_argParse.o c_calculateTask.o
 CLIENT_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(CLIENT_OBJ))
 
 SERVER_DIR    = $(SRC_DIR)/server
@@ -15,7 +15,7 @@ SERVER_OBJ    = s_main.o s_task.o s_server.o s_protocol.o
 SERVER_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(SERVER_OBJ))
 
 LIBRARY_DIR   = $(SRC_DIR)/lib
-LIBRARY_OBJ    = l_ip.o l_calc.o
+LIBRARY_OBJ    = l_ip.o l_calc.o l_networkSetup.o 
 LIBRARY_OBJS   = $(patsubst %,$(BUILD_DIR)/%,$(LIBRARY_OBJ))
 
 all: libcalc manual_test client server ## Compile everything
