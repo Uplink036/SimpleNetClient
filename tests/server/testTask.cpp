@@ -13,13 +13,11 @@ BOOST_AUTO_TEST_CASE(testTaskCorrectIntervalValues) {
     free(task);
 }
 
-BOOST_AUTO_TEST_CASE( testTaskCorrectResultValues)
-{
+BOOST_AUTO_TEST_CASE(testTaskCorrectResultValues) {
     STask* task = getRandomTask();
     int opResult;
     double temp;
-    switch (task->opID)
-    {
+    switch (task->opID) {
     case op::ADD:
         opResult = task->valueOne + task->valueTwo;
         break;
@@ -41,15 +39,12 @@ BOOST_AUTO_TEST_CASE( testTaskCorrectResultValues)
     free(task);
 }
 
-BOOST_AUTO_TEST_CASE( testTaskRobustness)
-{
-    for (int i = 0; i < 10; i++)
-    {
+BOOST_AUTO_TEST_CASE(testTaskRobustness) {
+    for (int i = 0; i < 10; i++) {
         STask* task = getRandomTask();
         int opResult;
         double temp;
-        switch (task->opID)
-        {
+        switch (task->opID) {
         case op::ADD:
             opResult = task->valueOne + task->valueTwo;
             break;
@@ -73,8 +68,7 @@ BOOST_AUTO_TEST_CASE( testTaskRobustness)
 }
 
 
-BOOST_AUTO_TEST_CASE( tesTaskToStringADD)
-{
+BOOST_AUTO_TEST_CASE(tesTaskToStringADD) {
     STask task;
     task.opID = op::ADD;
     task.valueOne = 1;
@@ -84,8 +78,7 @@ BOOST_AUTO_TEST_CASE( tesTaskToStringADD)
     free(taskString);
 }
 
-BOOST_AUTO_TEST_CASE( tesTaskToStringSUB)
-{
+BOOST_AUTO_TEST_CASE(tesTaskToStringSUB) {
     STask task;
     task.opID = op::SUB;
     task.valueOne = 1;
@@ -95,8 +88,7 @@ BOOST_AUTO_TEST_CASE( tesTaskToStringSUB)
     free(taskString);
 }
 
-BOOST_AUTO_TEST_CASE( tesTaskToStringDIV)
-{
+BOOST_AUTO_TEST_CASE(tesTaskToStringDIV) {
     STask task;
     task.opID = op::DIV;
     task.valueOne = 1;
@@ -106,8 +98,7 @@ BOOST_AUTO_TEST_CASE( tesTaskToStringDIV)
     free(taskString);
 }
 
-BOOST_AUTO_TEST_CASE( tesTaskToStringMUL)
-{
+BOOST_AUTO_TEST_CASE(tesTaskToStringMUL) {
     STask task;
     task.opID = op::MUL;
     task.valueOne = 1;

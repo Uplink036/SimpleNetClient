@@ -7,7 +7,7 @@ void listenOnPort(int socket_fd, addrinfo* serverIP) {
   struct sockaddr_storage their_addr;
   char client[INET6_ADDRSTRLEN];
   int new_fd;
-  while(true) {
+  while (true) {
     socket_in_size = sizeof(their_addr);
     new_fd = accept(socket_fd, (struct sockaddr *)&their_addr,
                     &socket_in_size);
@@ -48,7 +48,7 @@ int bindPort(char* desiredPort, addrinfo** selectedIP) {
 
   int socket_fd;
   addrinfo* p;
-  for(p = avaliableIPs; p != NULL; p = p->ai_next) {
+  for (p = avaliableIPs; p != NULL; p = p->ai_next) {
     socket_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
     IF_NEGATIVE(socket_fd) {
         perror("server: socket\n");
