@@ -1,6 +1,6 @@
 
-#ifndef MACROS_H
-#define MACROS_H
+#ifndef SRC_LIB_MACROS_H_
+#define SRC_LIB_MACROS_H_
 
 #define AND       &&
 #define OR        ||
@@ -16,4 +16,4 @@
 #define IF_NEGATIVE(stmt) if (stmt < 0)
 #define IF_NULL(stmt) if (stmt EQUALS NULL)
 
-#endif
+#endif  // SRC_LIB_MACROS_H_
