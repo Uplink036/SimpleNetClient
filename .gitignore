@@ -1,5 +1,10 @@
+# Output files
 client
+!src/client
+!tests/client
 server
+!src/server
+!tests/server
 test
 
 # Prerequisites
