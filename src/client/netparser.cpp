@@ -31,7 +31,7 @@ void getIPnPORT(char* input, char** ip, char** port) {
     char *proto_end = strstr(input, "://");
     char *ipStart = proto_end+3;
     char *portEnd = strstr(ipStart, "/");
-    char *ipNPort = reinterpret_cast<char*>(calloc(portEnd-ipStart+1,
+    char *ipNPort = static_cast<char*>(calloc(portEnd-ipStart+1,
                                                    sizeof(char)));
     strncpy(ipNPort, ipStart, portEnd-ipStart);
     DEBUG_FUNCTION("client::netparser::getIPnPORT - ipNPort %s", ipNPort);

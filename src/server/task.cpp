@@ -93,7 +93,7 @@ int taskResult(STask* task) {
 
 STask* getRandomTask() {
     DEBUG_FUNCTION("server::task::getRandomTask(%s)\n", "");
-    STask* task = reinterpret_cast<STask*>(malloc(sizeof(*task)));
+    STask* task = static_cast<STask*>(malloc(sizeof(*task)));
     memset(task, 0, sizeof(*task));
     task->opID =  op(randomInt() % 4);
     task->valueOne = randomInt();
@@ -106,7 +106,7 @@ char* taskToString(STask* task) {
     DEBUG_FUNCTION("server::task::taskToString(%d, %d, %d)\n",
                     task->opID, task->valueOne, task->valueTwo);
     const size_t stringSize = 31+1;
-    char* taskString = reinterpret_cast<char*>(calloc(stringSize,
+    char* taskString = static_cast<char*>(calloc(stringSize,
                                                       sizeof(char)));
     snprintf(taskString, stringSize, "%s %d %d\n",
             arith[task->opID],

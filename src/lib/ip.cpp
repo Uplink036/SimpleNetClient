@@ -30,11 +30,11 @@ int splitIPPortFromString(char* string, char**ip, char** port) {
         if (string[i] == delim) {
         int destinationLength = i;
         int portLength = inputLen - (i);
-        *ip = reinterpret_cast<char*>(malloc((destinationLength+2) *
+        *ip = static_cast<char*>(malloc((destinationLength+2) *
                                              sizeof(char)));
         memset(*ip, 0, (destinationLength+2)*sizeof(char));
         strncpy(*ip, string, destinationLength);
-        *port = reinterpret_cast<char*>(malloc((portLength+2)*sizeof(char)));
+        *port = static_cast<char*>(malloc((portLength+2)*sizeof(char)));
         memset(*port, 0, (portLength+2)*sizeof(char));
         strncpy(*port, string+i+1, portLength-1);
         break;
