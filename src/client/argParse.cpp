@@ -1,5 +1,4 @@
 #include "src/client/argParse.h"
-#include <cstdio>
 
 void parseInputArgs(
   char *argv[],
