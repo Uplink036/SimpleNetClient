@@ -18,6 +18,7 @@ void validateInputArgs(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
+  DEBUG_FUNCTION("server::main::main(&d, ...)\n", argc);
   validateInputArgs(argc, argv);
 
   int socket_fd;

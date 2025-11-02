@@ -1,7 +1,7 @@
 #include "src/client/calculateTask.h"
 
 enum op stringToOp(char* input) {
-  DEBUG_FUNCTION("client::main::stringToOp(%s)", input);
+  DEBUG_FUNCTION("client::calculateTask::stringToOp(%s)", input);
   IF_ZERO(strcmp("add", input))
     return op::ADD;
   IF_ZERO(strcmp("sub", input))
@@ -11,13 +11,13 @@ enum op stringToOp(char* input) {
   IF_ZERO(strcmp("div", input))
     return op::DIV;
   printf("ERROR: GOT UNEXPECTED OP COMMAND\n");
-  DEBUG_FUNCTION("ERROR - %s is not a defined op", input);
+  DEBUG_FUNCTION("client::calculateTask::stringToOp - %s is not a defined op", input);
   exit(EXIT_FAILURE);
 }
 
 
 int calculateServerTask(char* msg) {
-  DEBUG_FUNCTION("client::main::calculateServerTask(%s)\n", msg);
+  DEBUG_FUNCTION("client::calculateTask::calculateServerTask(%s)\n", msg);
   char operation[10];
   int valueOne, valueTwo;
   IF_NEGATIVE(sscanf(msg, "%s %d %d", operation, &valueOne, &valueTwo)) {

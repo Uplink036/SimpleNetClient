@@ -50,7 +50,7 @@ bool getClientProtocol(int client_fd, ApplicationProtocl* clientProtocol) {
       }
     }
   }
-  DEBUG_FUNCTION("server::main::getClientProtocol - Found no matching "
+  DEBUG_FUNCTION("server::protocol::getClientProtocol - Found no matching "
                  "protocols for %s\n", msg);
   return false;
 }

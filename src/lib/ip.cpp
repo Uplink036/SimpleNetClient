@@ -1,7 +1,7 @@
 #include "src/lib/ip.h"
 
 bool validPORT(char* port) {
-    DEBUG_FUNCTION("client::ip::validPORT(%s)\n", port);
+    DEBUG_FUNCTION("lib::ip::validPORT(%s)\n", port);
     int portLength = strlen(port);
     if (!(portLength > 0))
         return false;
@@ -14,14 +14,14 @@ bool validPORT(char* port) {
 }
 
 bool validIP(char* ip) {
-    DEBUG_FUNCTION("client::ip::validIP(%s)\n", ip);
+    DEBUG_FUNCTION("lib::ip::validIP(%s)\n", ip);
     if (!(strlen(ip) > 0))
         return false;
     return true;
 }
 
 int splitIPPortFromString(char* string, char**ip, char** port) {
-    DEBUG_FUNCTION("client::ip::splitIPPortFromString(%s, %p, %p)\n", string,
+    DEBUG_FUNCTION("lib::ip::splitIPPortFromString(%s, %p, %p)\n", string,
                    ip, port);
     char delim = ':';
     int i;

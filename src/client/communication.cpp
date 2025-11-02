@@ -1,25 +1,25 @@
 #include "src/client/communication.h"
 
 int getServerTask(int socketfd, char* msg) {
-  DEBUG_FUNCTION("client::main::getServerTask(%d %s)\n", socketfd, msg);
+  DEBUG_FUNCTION("client::communication::getServerTask(%d %s)\n", socketfd, msg);
   static const int max_buffer_size = 1499;
   memset(msg, 0, 1500);
   int readSize = recv(socketfd, msg, max_buffer_size, 0);
-  DEBUG_FUNCTION("client::main::getServerTask - Got %d bytes = %s",
+  DEBUG_FUNCTION("client::communication::getServerTask - Got %d bytes = %s",
                  readSize, msg);
   return readSize;
 }
 
 bool getServerProtocols(int socketfd, char* expected_protocol,
                         fd_set* fdset, timeval* tv) {
-  DEBUG_FUNCTION("client::main::getServerProtocols(%d, ...)\n", socketfd);
+  DEBUG_FUNCTION("client::communication::getServerProtocols(%d, ...)\n", socketfd);
   bool foundProtocl = false;
   char msg[1500];
   static const int max_buffer_size = sizeof(msg)-1;
   int loop = 0;
   do {
     memset(msg, 0, 1500);
-    DEBUG_FUNCTION("client::main::fromServer - Waiting %d\n", loop++);
+    DEBUG_FUNCTION("client::communication::fromServer - Waiting %d\n", loop++);
     int readSize = recv(socketfd, &msg, max_buffer_size, 0);
     if (select(socketfd + 1, fdset, NULL, NULL, tv) == 1) {
         int so_error;
@@ -27,11 +27,11 @@ bool getServerProtocols(int socketfd, char* expected_protocol,
         getsockopt(socketfd, SOL_SOCKET, SO_ERROR, &so_error, &len);
         if (so_error == 0) {
           int readSize = recv(socketfd, &msg, max_buffer_size, 0);
-          DEBUG_FUNCTION("client::main::fromServer - Received %d bytes = %s",
+          DEBUG_FUNCTION("client::communication::fromServer - Received %d bytes = %s",
                          readSize, msg);
           IF_NEGATIVE(readSize)
             return false;
-          DEBUG_FUNCTION("client::main::fromServer - Looking for - %s",
+          DEBUG_FUNCTION("client::communication::fromServer - Looking for - %s",
                          expected_protocol);
           if (strstr(msg, expected_protocol) NOTEQUALS NULL) {
             foundProtocl = true;
@@ -49,7 +49,7 @@ bool getServerProtocols(int socketfd, char* expected_protocol,
 
 int sendClientProtocol(bool foundProtocl, int socketfd, char pathstring[7],
                        char protocolstring[6]) {
-  DEBUG_FUNCTION("client::main::sendClientProtocol(%d, %d, %s, %s)\n",
+  DEBUG_FUNCTION("client::communication::sendClientProtocol(%d, %d, %s, %s)\n",
                   foundProtocl, socketfd, pathstring, protocolstring);
   if (NOT foundProtocl) {
     char errorMessage[] = "ERROR\n";
@@ -63,7 +63,7 @@ int sendClientProtocol(bool foundProtocl, int socketfd, char pathstring[7],
 }
 
 int sendResultToServer(int result, int socketfd) {
-  DEBUG_FUNCTION("client::main::sendResultToServer(%d, %d)\n",
+  DEBUG_FUNCTION("client::communication::sendResultToServer(%d, %d)\n",
                  result, socketfd);
   char resultMessage[100];
   memset(resultMessage, 0, 100);
@@ -72,7 +72,7 @@ int sendResultToServer(int result, int socketfd) {
 }
 
 void getResultResponseBack(int socketfd, int result) {
-  DEBUG_FUNCTION("client::main::getResultResponseBack(%d)\n", socketfd);
+  DEBUG_FUNCTION("client::communication::getResultResponseBack(%d)\n", socketfd);
   char msg[1500];
   memset(msg, 0, 1500);
   static const int max_buffer_size = sizeof(msg)-1;

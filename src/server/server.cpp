@@ -1,7 +1,7 @@
 #include "src/server/server.h"
 
 void listenOnPort(int socket_fd, addrinfo* serverIP) {
-  DEBUG_FUNCTION("server::main::listenOnPort(%d, %p)\n", socket_fd, serverIP);
+  DEBUG_FUNCTION("server::server::listenOnPort(%d, %p)\n", socket_fd, serverIP);
   int childCnt = 0;
   socklen_t socket_in_size;
   struct sockaddr_storage their_addr;
@@ -33,7 +33,7 @@ void listenOnPort(int socket_fd, addrinfo* serverIP) {
 }
 
 int bindPort(char* desiredPort, addrinfo** selectedIP) {
-  DEBUG_FUNCTION("server::main::bindPort(%s, %p)\n", desiredPort, selectedIP);
+  DEBUG_FUNCTION("server::server::bindPort(%s, %p)\n", desiredPort, selectedIP);
 
   addrinfo hints;
   addrinfo* avaliableIPs;
