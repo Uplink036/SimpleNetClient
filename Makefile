@@ -62,7 +62,7 @@ lib: $(LIBRARY_BUILD_OBJS) ## Generate the calc lib file (is needed)
 libcalc: lib ## Generate the calc lib file (is needed)
 
 lint: ## Run CPP lint
-	cpplint --recursive src/
+	cpplint --recursive --output=junit src/ 2> a.txt
 
 clean: ## Clean generated files
 	rm -f *.o  build/*.o
