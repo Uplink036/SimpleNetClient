@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #define DEBUG 0
-#define DEBUG_FUNCTION(msg, ...) if (DEBUG) printf(msg, __VA_ARGS__)
+#define DEBUG_FUNCTION(...) if (DEBUG) printf(__VA_ARGS__)
 
 
 #endif  // SRC_DEBUG_H_
