@@ -20,12 +20,23 @@ void validateInputArgs(int argc, char *argv[]) {
     printf("Expected format: [<PROGRAM>] [<DNS|IPv4|IPv6>:<PORT>]\n");
     exit(-1);
   }
-  if (strstr(argv[1], "///") != NULL) {
+  IF_NOT_NULL(strstr(argv[1], "///")) {
     printf("Invalid format: %s.\n", argv[1]);
     exit(-1);
   }
-  if (strstr(argv[1], "://") == NULL) {
+  char* protoEnd = strstr(argv[1], "://");
+  IF_NULL(protoEnd) {
     printf("Invalid format: missing '://'\n");
+    exit(-1);
+  }
+  char* portStart = strstr(protoEnd+3, ":");
+  IF_NULL(portStart) {
+    printf("Invalid format: missing ':'\n");
+    exit(-1);
+  }
+  char* apiStart = strstr(protoEnd+3, "/");
+  IF_NULL(apiStart) {
+    printf("Invalid format: missing '/'\n");
     exit(-1);
   }
 }
