@@ -1,16 +1,13 @@
-#ifndef IP_H
-#define IP_H
+#ifndef SRC_LIB_IP_H_
+#define SRC_LIB_IP_H_
 
 #include <stdlib.h>
 #include <string.h>
-#include "debug.h"
+#include <string>
+#include "src/debug.h"
 
 int splitIPPortFromString(char* string, char**ip, char** port);
 bool validPORT(char* port);
 bool validIP(char* ip);
-/*
-Given a string, it will split it into ip and port, which we be malloced for this reason.
-If it fails, it will return a negativ value, otherwise it will return a positive one.
-*/
 
-#endif
+#endif  // SRC_LIB_IP_H_

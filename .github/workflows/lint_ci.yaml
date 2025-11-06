@@ -1,0 +1,29 @@
+name: CPP Lint Workflow 
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches: 
+      - "*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup CPPLINT
+      run: |
+        sudo apt install -y python3-pip
+        pip3 install cpplint
+    - name: run linter
+      run: |
+        cpplint --recursive --output=junit src/ 2> cpplint-report.txt || true
+        echo cpplint-report.txt
+    - name: Upload CPPLint Report                                                   
+      uses: actions/upload-artifact@v4                                              
+      with:                                                                         
+        name: cpplint-report                                                        
+        path: cpplint-report.txt    

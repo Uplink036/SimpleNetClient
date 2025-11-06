@@ -1,13 +1,13 @@
-#ifndef TASK_H
-#define TASK_H
+#ifndef SRC_CLIENT_CALCULATETASK_H_
+#define SRC_CLIENT_CALCULATETASK_H_
 
 #include <cmath>
 #include <cstring>
-#include "calc.h"
-#include "macros.h"
-#include "debug.h"
+#include "src/lib/calc.h"
+#include "src/lib/macros.h"
+#include "src/debug.h"
 
 enum op stringToOp(char* input);
 int calculateServerTask(char* msg);
 
-#endif
+#endif  // SRC_CLIENT_CALCULATETASK_H_
