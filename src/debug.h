@@ -1,10 +1,10 @@
-#ifndef DEBUG_H
-#define DEBUG_H
+#ifndef SRC_DEBUG_H_
+#define SRC_DEBUG_H_
 
 #include <stdio.h>
 
 #define DEBUG 0
-#define DEBUG_FUNCTION(msg, ...) if (DEBUG) printf(msg, __VA_ARGS__)
+#define DEBUG_FUNCTION(...) if (DEBUG) printf(__VA_ARGS__)
 
 
-#endif
+#endif  // SRC_DEBUG_H_

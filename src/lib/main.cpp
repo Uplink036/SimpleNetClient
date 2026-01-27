@@ -4,7 +4,7 @@
 
 
 /* Include the calcLib header file, using <> as its a library and not just a object file we link.  */
-#include <calc.h>
+#include <src/lib/calc.h>
 
 
 

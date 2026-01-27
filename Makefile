@@ -1,4 +1,4 @@
-CXXFLAGS      = -Wall -Isrc -Isrc/lib -Isrc/client -Isrc/server -g
+CXXFLAGS      = -Wall -I. -g
 LIBFLAGS      = -fPIC $(CXXFLAGS)
 LD_FLAGS      = -Wall -L./ 
 
@@ -44,7 +44,7 @@ tests: test_client_object test_server_object ## Compile all the tests
 	{ \
 		set -e; \
 		FILES_TO_COMPILE=$$(find ./build/*.o ! -name "*_main.o");\
-		$(CXX) $(LD_FLAGS) -fsanitize=address -o tests.out $$FILES_TO_COMPILE -lcommon; \
+		$(CXX) $(LD_FLAGS) -o tests.out $$FILES_TO_COMPILE -lcommon; \
 	}
 
 manual_test: main.o ## Compile a test file of calculations
@@ -62,7 +62,7 @@ lib: $(LIBRARY_BUILD_OBJS) ## Generate the calc lib file (is needed)
 libcalc: lib ## Generate the calc lib file (is needed)
 
 lint: ## Run CPP lint
-	cpplint --recursive src/
+	cpplint --recursive --output=vs7 src/
 
 clean: ## Clean generated files
 	rm -f *.o  build/*.o

@@ -1,22 +1,21 @@
-#ifndef TASK_H
-#define TASK_H
+#ifndef SRC_SERVER_TASK_H_
+#define SRC_SERVER_TASK_H_
 
 #include <unistd.h>
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <calc.h>
 #include <stdio.h>
 #include <memory.h>
 #include <cmath>
-#include <string> 
+#include <string>
 
-#include "debug.h"
-#include "macros.h"
+#include "src/debug.h"
+#include "src/lib/calc.h"
+#include "src/lib/macros.h"
 
-struct STask
-{
+struct STask {
     op opID;
     int valueOne;
     int valueTwo;
@@ -29,4 +28,4 @@ bool recvClientTaskResult(int client_fd, STask* task);
 bool clientTask(int client_fd);
 STask* getRandomTask();
 char* taskToString(STask*);
-#endif
+#endif  // SRC_SERVER_TASK_H_
