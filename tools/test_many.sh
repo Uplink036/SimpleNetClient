@@ -1,0 +1,9 @@
+TRANSPORT_PROTOCOL=$1
+SERVER=$2
+APPLICATION_PROTOCOL=$3
+
+for i in $(seq 1 10);
+do
+    code="$(./client $TRANSPORT_PROTOCOL://$SERVER/$APPLICATION_PROTOCOL)"
+    echo $code
+done

@@ -65,6 +65,7 @@ lint: ## Run CPP lint
 	cpplint --recursive --output=vs7 src/
 
 clean: ## Clean generated files
+	rm -f client server test
 	rm -f *.o  build/*.o
 	rm -f *.a *.out
 
