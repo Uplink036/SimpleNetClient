@@ -9,5 +9,6 @@
 #include "src/debug.h"
 
 void populateTCPHint(addrinfo *hints);
+void populateUDPHint(addrinfo *hints);
 
 #endif  // SRC_LIB_NETWORKSETUP_H_

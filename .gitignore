@@ -6,6 +6,7 @@ server
 !src/server
 !tests/server
 test
+.env
 
 # Prerequisites
 *.d

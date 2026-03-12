@@ -2,6 +2,8 @@
 
 int connectTCP(char* destination, char* destinationPort,
                char pathstring[7], char protocolstring[6]) {
+  DEBUG_FUNCTION("client::udp::connectTCP(%s, %s, %s, %s)\n",
+    destination, destinationPort, pathstring, protocolstring);
   int exitStatus = 0;
   fd_set fdset;
   struct timeval tv;

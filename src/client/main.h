@@ -6,5 +6,6 @@
 #include "src/debug.h"
 #include "src/client/argParse.h"
 #include "src/client/tcp.h"
+#include "src/client/udp.h"
 
 #endif  // SRC_CLIENT_MAIN_H_

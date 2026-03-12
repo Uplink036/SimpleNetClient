@@ -7,3 +7,12 @@ void populateTCPHint(addrinfo* hints) {
   hints->ai_protocol = IPPROTO_TCP;
   hints->ai_socktype = SOCK_STREAM;
 }
+
+
+void populateUDPHint(addrinfo* hints) {
+  DEBUG_FUNCTION("lib::networkSetup::populateUDPHint(%p)\n", hints);
+  memset(hints, 0, sizeof(*hints));
+  hints->ai_family = AF_UNSPEC;
+  hints->ai_protocol = IPPROTO_UDP;
+  hints->ai_socktype = SOCK_DGRAM;
+}
