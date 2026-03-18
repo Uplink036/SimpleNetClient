@@ -1,7 +1,7 @@
 #include "src/client/udp.h"
 
 
-static bool getServerProtocolsUDP(int socketfd, calcProtocol* serverMessage) {
+bool getServerProtocolsUDP(int socketfd, calcProtocol* serverMessage) {
   DEBUG_FUNCTION("client::udp::getServerProtocols(%d, %p)\n", socketfd, serverMessage);
   calcMessage firstMessage;
   buildProtocolRequest(&firstMessage);
@@ -37,13 +37,13 @@ static bool getServerProtocolsUDP(int socketfd, calcProtocol* serverMessage) {
   }
 }
 
-static bool calculateTaskUDP(int socketfd, calcProtocol* serverProtocol,
+bool calculateTaskUDP(int socketfd, calcProtocol* serverProtocol,
                              calcProtocol* clientResponse) {
   DEBUG_FUNCTION("client::udp::calculateTaskUDP(%d, %p)\n", socketfd, serverProtocol);
   return calculateTask(serverProtocol, clientResponse);
 }
 
-static bool sendTaskResultsUDP(int socketfd, calcProtocol* clientResponse) {
+bool sendTaskResultsUDP(int socketfd, calcProtocol* clientResponse) {
   DEBUG_FUNCTION("client::udp::sendTaskResultsUDP(%d, %p)\n", socketfd, clientResponse);
   encodeCalcProtocol(clientResponse);
   ssize_t bytesSent = send(socketfd, clientResponse, sizeof(calcProtocol), 0);
@@ -54,7 +54,7 @@ static bool sendTaskResultsUDP(int socketfd, calcProtocol* clientResponse) {
   return true;
 }
 
-static bool getResultResponseBackUDP(int socketfd, int expectedResult) {
+bool getResultResponseBackUDP(int socketfd, int expectedResult) {
   DEBUG_FUNCTION("client::udp::getResultResponseBackUDP(%d, %d)\n", socketfd, expectedResult);
   calcMessage responseMessage;
   fd_set readSet;

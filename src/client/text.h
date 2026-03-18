@@ -1,5 +1,5 @@
-#ifndef SRC_CLIENT_CALCULATETASK_H_
-#define SRC_CLIENT_CALCULATETASK_H_
+#ifndef SRC_CLIENT_TEXT_H_
+#define SRC_CLIENT_TEXT_H_
 
 #include <cmath>
 #include <cstring>
@@ -10,4 +10,4 @@
 enum op stringToOp(char* input);
 int calculateServerTask(char* msg);
 
-#endif  // SRC_CLIENT_CALCULATETASK_H_
+#endif  // SRC_CLIENT_TEXT_H_

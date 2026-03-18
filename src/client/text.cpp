@@ -1,4 +1,4 @@
-#include "src/client/calculateTask.h"
+#include "src/client/text.h"
 
 enum op stringToOp(char* input) {
   DEBUG_FUNCTION("client::calculateTask::stringToOp(%s)", input);
