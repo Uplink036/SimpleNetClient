@@ -54,27 +54,35 @@ bool getServerProtocols(int socketfd, calcProtocol* serverMessage) {
 bool calculateTaskUDP(int socketfd, calcProtocol* serverProtocol, calcProtocol* clientResponse) {
   DEBUG_FUNCTION("client::udp::calculateTaskUDP(%d, %p)\n", socketfd, serverProtocol);
   int result;
+  char operation[5];
   switch(serverProtocol->arith) {
     case 1:
       result = serverProtocol->inValue1 +
                 serverProtocol->inValue2;
+      strcpy(operation, "add");
       break;
     case 2:
       result = serverProtocol->inValue1 -
                 serverProtocol->inValue2;
+      strcpy(operation, "sub");
       break;
     case 3:
       result = serverProtocol->inValue1 *
               serverProtocol->inValue2;
+      strcpy(operation, "mul");
+
       break;
     case 4:
       result = round((double)serverProtocol->inValue1 /
                 (double)serverProtocol->inValue2);
+      strcpy(operation, "div");
       break;
     default:
-      printf("ERROR: UNEXPECTED OPERATION\n");
-      return false;
+    printf("ERROR: UNEXPECTED OPERATION\n");
+    return false;
   }
+  printf("ASSIGNMENT: %s %d %d\n", operation, serverProtocol->inValue1, serverProtocol->inValue2);
+  DEBUG_FUNCTION("Calculated %d\n", result);
   clientResponse->type = 2;
   clientResponse->major_version = 1;
   clientResponse->minor_version = 1;
