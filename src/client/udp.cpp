@@ -1,8 +1,7 @@
 #include "src/client/udp.h"
-#include "src/client/binary.h"
 
 
-static bool getServerProtocols(int socketfd, calcProtocol* serverMessage) {
+static bool getServerProtocolsUDP(int socketfd, calcProtocol* serverMessage) {
   DEBUG_FUNCTION("client::udp::getServerProtocols(%d, %p)\n", socketfd, serverMessage);
   calcMessage firstMessage;
   buildProtocolRequest(&firstMessage);
@@ -133,7 +132,7 @@ int connectUDP(char* destination, char* destinationPort,
         fflush(stdout);
         calcProtocol serverMessage;
         memset(&serverMessage, 0, sizeof(serverMessage));
-        bool foundProtocol = getServerProtocols(socketfd, &serverMessage);
+        bool foundProtocol = getServerProtocolsUDP(socketfd, &serverMessage);
         if (NOT foundProtocol) {
           printf("ERROR: NOT OK (ERROR WRONG SIZE OR INCORRECT PROTOCOL)\n");
           DEBUG_FUNCTION("Failed to get a protocol from server after");
