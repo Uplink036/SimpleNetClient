@@ -11,7 +11,7 @@
 
 void buildProtocolRequest(calcMessage* msg);
 void decodeCalcProtocol(calcProtocol* proto);
-bool calculateTask(calcProtocol* serverProtocol, calcProtocol* clientResponse);
+bool calculateBinaryTask(calcProtocol* serverProtocol, calcProtocol* clientResponse);
 void encodeCalcProtocol(calcProtocol* proto);
 void decodeCalcMessage(calcMessage* msg);
 

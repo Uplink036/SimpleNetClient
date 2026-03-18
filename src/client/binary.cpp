@@ -20,8 +20,8 @@ void decodeCalcProtocol(calcProtocol* proto) {
   proto->inResult = ntohl(proto->inResult);
 }
 
-bool calculateTask(calcProtocol* serverProtocol, calcProtocol* clientResponse) {
-  DEBUG_FUNCTION("client::binary::calculateTask(%p, %p)\n", serverProtocol, clientResponse);
+bool calculateBinaryTask(calcProtocol* serverProtocol, calcProtocol* clientResponse) {
+  DEBUG_FUNCTION("client::binary::calculateBinaryTask(%p, %p)\n", serverProtocol, clientResponse);
   int result;
   char operation[5];
   switch (serverProtocol->arith) {

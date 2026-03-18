@@ -77,7 +77,7 @@ int connectTCP(char* destination, char* destinationPort,
           exitStatus = 1;
           goto freeTCP;
         }
-        int result = calculateServerTask(msg);
+        int result = calculateTextTask(msg);
         IF_NEGATIVE(sendResultToServer(result, socketfd)) {
           printf("ERROR: COULD NOT SEND RESULT BACK TO SERVER\n");
           DEBUG_FUNCTION("Could not send result back to server %d\n", 0);

@@ -8,6 +8,6 @@
 #include "src/debug.h"
 
 enum op stringToOp(char* input);
-int calculateServerTask(char* msg);
+int calculateTextTask(char* msg);
 
 #endif  // SRC_CLIENT_TEXT_H_

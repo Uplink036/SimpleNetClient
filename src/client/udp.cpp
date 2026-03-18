@@ -40,7 +40,7 @@ bool getServerProtocolsUDP(int socketfd, calcProtocol* serverMessage) {
 bool calculateTaskUDP(int socketfd, calcProtocol* serverProtocol,
                              calcProtocol* clientResponse) {
   DEBUG_FUNCTION("client::udp::calculateTaskUDP(%d, %p)\n", socketfd, serverProtocol);
-  return calculateTask(serverProtocol, clientResponse);
+  return calculateBinaryTask(serverProtocol, clientResponse);
 }
 
 bool sendTaskResultsUDP(int socketfd, calcProtocol* clientResponse) {
@@ -54,8 +54,8 @@ bool sendTaskResultsUDP(int socketfd, calcProtocol* clientResponse) {
   return true;
 }
 
-bool getResultResponseBackUDP(int socketfd, int expectedResult) {
-  DEBUG_FUNCTION("client::udp::getResultResponseBackUDP(%d, %d)\n", socketfd, expectedResult);
+bool getResultResponseBackUDP(int socketfd, int result) {
+  DEBUG_FUNCTION("client::udp::getResultResponseBackUDP(%d, %d)\n", socketfd, result);
   calcMessage responseMessage;
   fd_set readSet;
   FD_ZERO(&readSet);
@@ -72,7 +72,7 @@ bool getResultResponseBackUDP(int socketfd, int expectedResult) {
   if (bytesReceived == (ssize_t)sizeof(calcMessage)) {
     decodeCalcMessage(&responseMessage);
     if (responseMessage.message == 1) {
-      printf("OK\n");
+      printf("OK (myresult=%d)\n", result);
       return true;
     } else {
       printf("NOT OK\n");
@@ -147,6 +147,7 @@ int connectUDP(char* destination, char* destinationPort,
           exitStatus = 1;
           goto freeUDP;
         }
+        int result = clientResponse.inResult;
         bool sentResults = sendTaskResultsUDP(socketfd, &clientResponse);
         if (NOT sentResults) {
           printf("ERROR: NOT OK (ERROR SENDING RESULTS)\n");
@@ -154,7 +155,7 @@ int connectUDP(char* destination, char* destinationPort,
           exitStatus = 1;
           goto freeUDP;
         }
-        bool gotResponseBack = getResultResponseBackUDP(socketfd, serverMessage.inResult);
+        bool gotResponseBack = getResultResponseBackUDP(socketfd, result);
         if (NOT gotResponseBack) {
           printf("ERROR: NOT OK (ERROR GETTING RESPONSE BACK FROM SERVER)\n");
           DEBUG_FUNCTION("Failed to get response back from server\n");
