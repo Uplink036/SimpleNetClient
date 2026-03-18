@@ -1,14 +1,11 @@
 #include "src/client/udp.h"
+#include "src/client/binary.h"
 
 
-bool getServerProtocols(int socketfd, calcProtocol* serverMessage) {
+static bool getServerProtocols(int socketfd, calcProtocol* serverMessage) {
   DEBUG_FUNCTION("client::udp::getServerProtocols(%d, %p)\n", socketfd, serverMessage);
   calcMessage firstMessage;
-  firstMessage.type = htons(22);
-  firstMessage.message = htonl(0);
-  firstMessage.protocol = htons(17);
-  firstMessage.major_version = htons(1);
-  firstMessage.minor_version = htons(1);
+  buildProtocolRequest(&firstMessage);
   ssize_t bytesSent = send(socketfd, &firstMessage, sizeof(calcMessage), 0);
   if (bytesSent < 0) {
     perror("ERROR: COULD NOT SEND PROTOCOL REQUEST TO SERVER\n");
@@ -31,79 +28,25 @@ bool getServerProtocols(int socketfd, calcProtocol* serverMessage) {
   if (bytesReceived < 0) {
     perror("ERROR: PROTOCOL NOT RECEIVED");
     return false;
-  }
-  else if (bytesReceived == sizeof(calcMessage)) {
+  } else if (bytesReceived == (ssize_t)sizeof(calcMessage)) {
     return false;
-  }
-  else if (bytesReceived == sizeof(calcProtocol)) {
-    serverMessage->type = ntohs(serverMessage->type);
-    serverMessage->major_version = ntohs(serverMessage->major_version);
-    serverMessage->minor_version = ntohs(serverMessage->minor_version);
-    serverMessage->id = ntohl(serverMessage->id);
-    serverMessage->arith = ntohl(serverMessage->arith);
-    serverMessage->inValue1 = ntohl(serverMessage->inValue1);
-    serverMessage->inValue2 = ntohl(serverMessage->inValue2);
-    serverMessage->inResult = ntohl(serverMessage->inResult);
+  } else if (bytesReceived == (ssize_t)sizeof(calcProtocol)) {
+    decodeCalcProtocol(serverMessage);
     return true;
-  }
-  else {
+  } else {
     return false;
   }
 }
 
-bool calculateTaskUDP(int socketfd, calcProtocol* serverProtocol, calcProtocol* clientResponse) {
+static bool calculateTaskUDP(int socketfd, calcProtocol* serverProtocol,
+                             calcProtocol* clientResponse) {
   DEBUG_FUNCTION("client::udp::calculateTaskUDP(%d, %p)\n", socketfd, serverProtocol);
-  int result;
-  char operation[5];
-  switch(serverProtocol->arith) {
-    case 1:
-      result = serverProtocol->inValue1 +
-                serverProtocol->inValue2;
-      strcpy(operation, "add");
-      break;
-    case 2:
-      result = serverProtocol->inValue1 -
-                serverProtocol->inValue2;
-      strcpy(operation, "sub");
-      break;
-    case 3:
-      result = serverProtocol->inValue1 *
-              serverProtocol->inValue2;
-      strcpy(operation, "mul");
-
-      break;
-    case 4:
-      result = round((double)serverProtocol->inValue1 /
-                (double)serverProtocol->inValue2);
-      strcpy(operation, "div");
-      break;
-    default:
-    printf("ERROR: UNEXPECTED OPERATION\n");
-    return false;
-  }
-  printf("ASSIGNMENT: %s %d %d\n", operation, serverProtocol->inValue1, serverProtocol->inValue2);
-  DEBUG_FUNCTION("Calculated %d\n", result);
-  clientResponse->type = 2;
-  clientResponse->major_version = 1;
-  clientResponse->minor_version = 1;
-  clientResponse->id = serverProtocol->id;
-  clientResponse->arith = serverProtocol->arith;
-  clientResponse->inValue1 = serverProtocol->inValue1;
-  clientResponse->inValue2 = serverProtocol->inValue2;
-  clientResponse->inResult = result;
-  return true;
+  return calculateTask(serverProtocol, clientResponse);
 }
 
-bool sendTaskResultsUDP(int socketfd, calcProtocol* clientResponse) {
+static bool sendTaskResultsUDP(int socketfd, calcProtocol* clientResponse) {
   DEBUG_FUNCTION("client::udp::sendTaskResultsUDP(%d, %p)\n", socketfd, clientResponse);
-  clientResponse->type = htons(clientResponse->type);
-  clientResponse->major_version = htons(clientResponse->major_version);
-  clientResponse->minor_version = htons(clientResponse->minor_version);
-  clientResponse->id = htonl(clientResponse->id);
-  clientResponse->arith = htonl(clientResponse->arith);
-  clientResponse->inValue1 = htonl(clientResponse->inValue1);
-  clientResponse->inValue2 = htonl(clientResponse->inValue2);
-  clientResponse->inResult = htonl(clientResponse->inResult);
+  encodeCalcProtocol(clientResponse);
   ssize_t bytesSent = send(socketfd, clientResponse, sizeof(calcProtocol), 0);
   if (bytesSent < 0) {
     printf("ERROR: COULD NOT SEND RESULT BACK TO SERVER\n");
@@ -112,8 +55,7 @@ bool sendTaskResultsUDP(int socketfd, calcProtocol* clientResponse) {
   return true;
 }
 
-
-bool getResultResponseBackUDP(int socketfd, int expectedResult) {
+static bool getResultResponseBackUDP(int socketfd, int expectedResult) {
   DEBUG_FUNCTION("client::udp::getResultResponseBackUDP(%d, %d)\n", socketfd, expectedResult);
   calcMessage responseMessage;
   fd_set readSet;
@@ -128,12 +70,8 @@ bool getResultResponseBackUDP(int socketfd, int expectedResult) {
     return false;
   }
   ssize_t bytesReceived = recv(socketfd, &responseMessage, sizeof(calcMessage), 0);
-  if (bytesReceived == sizeof(calcMessage)) {
-    responseMessage.type = ntohs(responseMessage.type);
-    responseMessage.message = ntohl(responseMessage.message);
-    responseMessage.protocol = ntohs(responseMessage.protocol);
-    responseMessage.major_version = ntohs(responseMessage.major_version);
-    responseMessage.minor_version = ntohs(responseMessage.minor_version);
+  if (bytesReceived == (ssize_t)sizeof(calcMessage)) {
+    decodeCalcMessage(&responseMessage);
     if (responseMessage.message == 1) {
       printf("OK\n");
       return true;
@@ -141,8 +79,7 @@ bool getResultResponseBackUDP(int socketfd, int expectedResult) {
       printf("NOT OK\n");
       return false;
     }
-  }
-  else {
+  } else {
     printf("ERROR: COULD NOT GET RESPONSE BACK FROM SERVER (INCORRECT SIZE)\n");
     return false;
   }
