@@ -1,4 +1,5 @@
 #include "src/client/communication.h"
+#include "src/client/text.h"
 
 int getServerTask(int socketfd, char* msg) {
   DEBUG_FUNCTION("client::communication::getServerTask(%d %s)\n", socketfd, msg);
@@ -66,8 +67,8 @@ int sendResultToServer(int result, int socketfd) {
   DEBUG_FUNCTION("client::communication::sendResultToServer(%d, %d)\n",
                  result, socketfd);
   char resultMessage[100];
-  memset(resultMessage, 0, 100);
-  snprintf(resultMessage, sizeof(resultMessage), "%d\n", result);
+  memset(resultMessage, 0, sizeof(resultMessage));
+  formatTextResult(result, resultMessage, sizeof(resultMessage));
   return send(socketfd, resultMessage, strlen(resultMessage), 0);
 }
 
