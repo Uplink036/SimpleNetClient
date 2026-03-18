@@ -108,16 +108,19 @@ bool sendTaskResultsUDP(int socketfd, calcProtocol* clientResponse) {
 bool getResultResponseBackUDP(int socketfd, int expectedResult) {
   DEBUG_FUNCTION("client::udp::getResultResponseBackUDP(%d, %d)\n", socketfd, expectedResult);
   calcMessage responseMessage;
+  fd_set readSet;
+  FD_ZERO(&readSet);
+  FD_SET(socketfd, &readSet);
+  struct timeval tv;
+  tv.tv_sec = 2;
+  tv.tv_usec = 0;
+  int selectResult = select(socketfd + 1, &readSet, NULL, NULL, &tv);
+  if (selectResult <= 0) {
+    printf("ERROR: MESSAGE LOST (TIMEOUT)\n");
+    return false;
+  }
   ssize_t bytesReceived = recv(socketfd, &responseMessage, sizeof(calcMessage), 0);
-  if (bytesReceived < 0) {
-    printf("ERROR: COULD NOT GET RESPONSE BACK FROM SERVER (TIMEOUT)\n");
-    return false;
-  }
-  else if (bytesReceived == sizeof(calcProtocol)) {
-    printf("ERROR: COULD NOT GET RESPONSE BACK FROM SERVER (INCORRECT PROTOCOL)\n");
-    return false;
-  }
-  else if (bytesReceived == sizeof(calcMessage)) {
+  if (bytesReceived == sizeof(calcMessage)) {
     responseMessage.type = ntohs(responseMessage.type);
     responseMessage.message = ntohl(responseMessage.message);
     responseMessage.protocol = ntohs(responseMessage.protocol);
@@ -188,7 +191,7 @@ int connectUDP(char* destination, char* destinationPort,
         bool foundProtocol = getServerProtocols(socketfd, &serverMessage);
         if (NOT foundProtocol) {
           printf("ERROR: NOT OK (ERROR WRONG SIZE OR INCORRECT PROTOCOL)\n");
-          DEBUG_FUNCTION("Failed to get a protocol from server after")
+          DEBUG_FUNCTION("Failed to get a protocol from server after");
           exitStatus = 1;
           goto freeUDP;
         }
