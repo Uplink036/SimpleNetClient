@@ -5,10 +5,10 @@
 #include <netdb.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <cstring>
 #include "src/debug.h"
 #include "src/lib/macros.h"
 #include "src/lib/networkSetup.h"
-#include "src/client/communication.h"
 #include "src/client/text.h"
 #include <stdio.h>
 

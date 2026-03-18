@@ -1,7 +1,7 @@
 #include "src/client/udp.h"
 
 
-bool getServerProtocolsUDP(int socketfd, calcProtocol* serverMessage) {
+static bool getServerProtocols(int socketfd, calcProtocol* serverMessage) {
   DEBUG_FUNCTION("client::udp::getServerProtocols(%d, %p)\n", socketfd, serverMessage);
   calcMessage firstMessage;
   buildProtocolRequest(&firstMessage);
@@ -37,14 +37,14 @@ bool getServerProtocolsUDP(int socketfd, calcProtocol* serverMessage) {
   }
 }
 
-bool calculateTaskUDP(int socketfd, calcProtocol* serverProtocol,
-                             calcProtocol* clientResponse) {
-  DEBUG_FUNCTION("client::udp::calculateTaskUDP(%d, %p)\n", socketfd, serverProtocol);
+static bool calculateTask(int socketfd, calcProtocol* serverProtocol,
+                          calcProtocol* clientResponse) {
+  DEBUG_FUNCTION("client::udp::calculateTask(%d, %p)\n", socketfd, serverProtocol);
   return calculateBinaryTask(serverProtocol, clientResponse);
 }
 
-bool sendTaskResultsUDP(int socketfd, calcProtocol* clientResponse) {
-  DEBUG_FUNCTION("client::udp::sendTaskResultsUDP(%d, %p)\n", socketfd, clientResponse);
+static bool sendTaskResults(int socketfd, calcProtocol* clientResponse) {
+  DEBUG_FUNCTION("client::udp::sendTaskResults(%d, %p)\n", socketfd, clientResponse);
   encodeCalcProtocol(clientResponse);
   ssize_t bytesSent = send(socketfd, clientResponse, sizeof(calcProtocol), 0);
   if (bytesSent < 0) {
@@ -54,8 +54,8 @@ bool sendTaskResultsUDP(int socketfd, calcProtocol* clientResponse) {
   return true;
 }
 
-bool getResultResponseBackUDP(int socketfd, int result) {
-  DEBUG_FUNCTION("client::udp::getResultResponseBackUDP(%d, %d)\n", socketfd, result);
+static bool getResultResponseBack(int socketfd, int result) {
+  DEBUG_FUNCTION("client::udp::getResultResponseBack(%d, %d)\n", socketfd, result);
   calcMessage responseMessage;
   fd_set readSet;
   FD_ZERO(&readSet);
@@ -132,7 +132,7 @@ int connectUDP(char* destination, char* destinationPort,
         fflush(stdout);
         calcProtocol serverMessage;
         memset(&serverMessage, 0, sizeof(serverMessage));
-        bool foundProtocol = getServerProtocolsUDP(socketfd, &serverMessage);
+        bool foundProtocol = getServerProtocols(socketfd, &serverMessage);
         if (NOT foundProtocol) {
           printf("ERROR: NOT OK (ERROR WRONG SIZE OR INCORRECT PROTOCOL)\n");
           DEBUG_FUNCTION("Failed to get a protocol from server after");
@@ -140,7 +140,7 @@ int connectUDP(char* destination, char* destinationPort,
           goto freeUDP;
         }
         calcProtocol clientResponse;
-        bool calculatedTask = calculateTaskUDP(socketfd, &serverMessage, &clientResponse);
+        bool calculatedTask = calculateTask(socketfd, &serverMessage, &clientResponse);
         if (NOT calculatedTask) {
           printf("ERROR: NOT OK (ERROR CALCULATING TASK)\n");
           DEBUG_FUNCTION("Failed to calculate task from server\n");
@@ -148,14 +148,14 @@ int connectUDP(char* destination, char* destinationPort,
           goto freeUDP;
         }
         int result = clientResponse.inResult;
-        bool sentResults = sendTaskResultsUDP(socketfd, &clientResponse);
+        bool sentResults = sendTaskResults(socketfd, &clientResponse);
         if (NOT sentResults) {
           printf("ERROR: NOT OK (ERROR SENDING RESULTS)\n");
           DEBUG_FUNCTION("Failed to send results back to server\n");
           exitStatus = 1;
           goto freeUDP;
         }
-        bool gotResponseBack = getResultResponseBackUDP(socketfd, result);
+        bool gotResponseBack = getResultResponseBack(socketfd, result);
         if (NOT gotResponseBack) {
           printf("ERROR: NOT OK (ERROR GETTING RESPONSE BACK FROM SERVER)\n");
           DEBUG_FUNCTION("Failed to get response back from server\n");
