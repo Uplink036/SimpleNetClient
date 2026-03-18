@@ -1,3 +1,6 @@
+#ifndef SRC_LIB_MESSAGEPROTOCOL_H_
+#define SRC_LIB_MESSAGEPROTOCOL_H_
+
 #include <stdint.h>
 
 /* 
@@ -56,3 +59,5 @@ other numbers are reserved
    2 = NOT OK  // Reject 
 
 */
+
+#endif  // SRC_LIB_MESSAGEPROTOCOL_H_
