@@ -83,6 +83,67 @@ static void getResultResponseBack(int socketfd, int result) {
     printf("Fail myresult=%d, server response %s", result, msg);
 }
 
+static bool handleTextTask(int socketfd) {
+    char msg[1500];
+  IF_NEGATIVE(getServerTask(socketfd, msg)) {
+    printf("ERROR: COULD NOT SEND TASK TO SERVER (TIMEOUT)\n");
+    DEBUG_FUNCTION("Could not get task from server %d\n", 0);
+    return false;
+  }
+  int result = calculateTextTask(msg);
+  IF_NEGATIVE(sendResultToServer(result, socketfd)) {
+    printf("ERROR: COULD NOT SEND RESULT BACK TO SERVER\n");
+    DEBUG_FUNCTION("Could not send result back to server %d\n", 0);
+    return false;
+  }
+  getResultResponseBack(socketfd, result);
+  return true;
+}
+
+static bool handleBinaryTask(int socketfd) {
+  calcProtocol serverMessage;
+  ssize_t bytesReceived = recv(socketfd, &serverMessage, sizeof(calcProtocol), 0);
+  if (bytesReceived < 0) {
+    printf("ERROR: COULD NOT GET BINARY TASK FROM SERVER\n");
+      DEBUG_FUNCTION("Could not get binary task from server %d\n", 0);
+      return false;
+  } else if (bytesReceived == 0) {
+    printf("ERROR: MESSAGE LOST (TIMEOUT)\n");
+    DEBUG_FUNCTION("Could not get binary task from server %d\n", 0);
+    return false;
+  }
+  decodeCalcProtocol(&serverMessage);
+  calcProtocol clientResponse;
+  calculateBinaryTask(&serverMessage, &clientResponse);
+  int result = clientResponse.inResult;
+  encodeCalcProtocol(&clientResponse);
+  ssize_t bytesSent = send(socketfd, &clientResponse, sizeof(clientResponse), 0);
+  if (bytesSent != (ssize_t)sizeof(clientResponse)) {
+    printf("ERROR: COULD NOT SEND BINARY RESULT TO SERVER\n");
+    return false;
+  }
+
+  calcMessage responseMessage;
+  memset(&responseMessage, 0, sizeof(responseMessage));
+  bytesReceived = recv(socketfd, &responseMessage, sizeof(responseMessage), 0);
+  if (bytesReceived != (ssize_t)sizeof(responseMessage)) {
+    printf("ERROR: COULD NOT GET BINARY RESPONSE BACK FROM SERVER\n");
+    return false;
+  }
+  else if (bytesReceived == 0) {
+    printf("ERROR: MESSAGE LOST (TIMEOUT)\n");
+    DEBUG_FUNCTION("Could not get binary task from server %d\n", 0);
+    return false;
+  }
+  decodeCalcMessage(&responseMessage);
+  if (responseMessage.message == 1) {
+    printf("OK (myresult=%d)\n", result);
+    return true;
+  }
+  printf("NOT OK\n");
+  return false;
+}
+
 int connectTCP(char* destination, char* destinationPort,
                char pathstring[7], char protocolstring[6]) {
   DEBUG_FUNCTION("client::tcp::connectTCP(%s, %s, %s, %s)\n",
@@ -104,7 +165,7 @@ int connectTCP(char* destination, char* destinationPort,
   int returnValue = getaddrinfo(destination, destinationPort, &hints,
                                 &results);
   if (results == NULL OR returnValue < 0) {
-    printf("ERROR:");
+    printf("ERROR: COULD NOT GET ADDRESS INFO FOR DESTINATION\n");
     exitStatus = 1;
     goto freeTCP;
   }
@@ -153,21 +214,20 @@ int connectTCP(char* destination, char* destinationPort,
           exitStatus = 1;
           goto freeTCP;
         }
-        char msg[1500];
-        IF_NEGATIVE(getServerTask(socketfd, msg)) {
-          printf("ERROR: COULD NOT SEND TASK TO SERVER (TIMEOUT)\n");
-          DEBUG_FUNCTION("Could not get task from server %d\n", 0);
+        bool handledTask = false;
+        if (strcmp(pathstring, "TEXT") == 0)
+          handledTask = handleTextTask(socketfd);
+        else if (strcmp(pathstring, "BINARY") == 0)
+          handledTask = handleBinaryTask(socketfd);
+        else {
+          printf("ERROR: UNSUPPORTED APPLICATION PROTOCOL %s\n", pathstring);
           exitStatus = 1;
           goto freeTCP;
         }
-        int result = calculateTextTask(msg);
-        IF_NEGATIVE(sendResultToServer(result, socketfd)) {
-          printf("ERROR: COULD NOT SEND RESULT BACK TO SERVER\n");
-          DEBUG_FUNCTION("Could not send result back to server %d\n", 0);
+        if (NOT handledTask) {
           exitStatus = 1;
           goto freeTCP;
         }
-        getResultResponseBack(socketfd, result);
         break;
       }
     } else {

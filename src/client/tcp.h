@@ -10,6 +10,7 @@
 #include "src/lib/macros.h"
 #include "src/lib/networkSetup.h"
 #include "src/client/text.h"
+#include "src/client/binary.h"
 #include <stdio.h>
 
 int connectTCP( char* destination, char* destinationPort,
