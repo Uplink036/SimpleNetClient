@@ -1,5 +1,20 @@
 #include "src/client/tcp.h"
 
+static bool waitForRead(int socketfd) {
+  fd_set readSet;
+  FD_ZERO(&readSet);
+  FD_SET(socketfd, &readSet);
+  struct timeval tv;
+  tv.tv_sec = 2;
+  tv.tv_usec = 0;
+  int selectResult = select(socketfd + 1, &readSet, NULL, NULL, &tv);
+  if (selectResult <= 0) {
+    printf("ERROR: MESSAGE LOST (TIMEOUT)\n");
+    return false;
+  }
+  return true;
+}
+
 static int getServerTask(int socketfd, char* msg) {
   DEBUG_FUNCTION("client::tcp::getServerTask(%d %s)\n", socketfd, msg);
   static const int max_buffer_size = 1499;
@@ -10,39 +25,32 @@ static int getServerTask(int socketfd, char* msg) {
   return readSize;
 }
 
-static bool getServerProtocols(int socketfd, char* expected_protocol,
-                               fd_set* fdset, timeval* tv) {
+static bool getServerProtocols(int socketfd, char* protocolRequest) {
   DEBUG_FUNCTION("client::tcp::getServerProtocols(%d, ...)\n", socketfd);
   bool foundProtocl = false;
-  char msg[1500];
-  static const int max_buffer_size = sizeof(msg)-1;
+  char taskMessage[1500];
+  static const int max_buffer_size = sizeof(taskMessage)-1;
   int loop = 0;
   do {
-    memset(msg, 0, 1500);
+    memset(taskMessage, 0, 1500);
     DEBUG_FUNCTION("client::tcp::fromServer - Waiting %d\n", loop++);
-    int readSize = recv(socketfd, &msg, max_buffer_size, 0);
-    if (select(socketfd + 1, fdset, NULL, NULL, tv) == 1) {
-        int so_error;
-        socklen_t len = sizeof so_error;
-        getsockopt(socketfd, SOL_SOCKET, SO_ERROR, &so_error, &len);
-        if (so_error == 0) {
-          int readSize = recv(socketfd, &msg, max_buffer_size, 0);
-          DEBUG_FUNCTION("client::tcp::fromServer - Received %d bytes = %s",
-                         readSize, msg);
-          IF_NEGATIVE(readSize)
-            return false;
-          DEBUG_FUNCTION("client::tcp::fromServer - Looking for - %s",
-                         expected_protocol);
-          if (strstr(msg, expected_protocol) NOTEQUALS NULL) {
-            foundProtocl = true;
-            break;
-          }
-        }
+    if (waitForRead(socketfd)) {
+      int readSize = recv(socketfd, &taskMessage, max_buffer_size, 0);
+      DEBUG_FUNCTION("client::tcp::fromServer - Received %d bytes = %s",
+                     readSize, taskMessage);
+      IF_NEGATIVE(readSize)
+        return false;
+      DEBUG_FUNCTION("client::tcp::fromServer - Looking for - %s",
+                     protocolRequest);
+      if (strstr(taskMessage, protocolRequest) NOTEQUALS NULL) {
+        foundProtocl = true;
+        break;
+      }
     } else {
       break;
     }
-  } while (msg[0] != '\n' AND loop < 2000);
-  DEBUG_FUNCTION("Got task %s ", msg);
+  } while (taskMessage[0] != '\n' AND loop < 2000);
+  DEBUG_FUNCTION("Got task %s ", taskMessage);
   fflush(stdout);
   return foundProtocl;
 }
@@ -73,14 +81,14 @@ static int sendResultToServer(int result, int socketfd) {
 
 static void getResultResponseBack(int socketfd, int result) {
   DEBUG_FUNCTION("client::tcp::getResultResponseBack(%d)\n", socketfd);
-  char msg[1500];
-  memset(msg, 0, 1500);
-  static const int max_buffer_size = sizeof(msg)-1;
-  recv(socketfd, &msg, max_buffer_size, 0);
-  if (strcmp(msg, "OK\n") == 0)
+  char responseMessage[1500];
+  memset(responseMessage, 0, 1500);
+  static const int max_buffer_size = sizeof(responseMessage)-1;
+  recv(socketfd, &responseMessage, max_buffer_size, 0);
+  if (strcmp(responseMessage, "OK\n") == 0)
     printf("OK (myresult=%d)\n", result);
   else
-    printf("Fail myresult=%d, server response %s", result, msg);
+    printf("Fail myresult=%d, server response %s", result, responseMessage);
 }
 
 static bool handleTextTask(int socketfd) {
@@ -192,12 +200,10 @@ int connectTCP(char* destination, char* destinationPort,
         DEBUG_FUNCTION("Testing connection %c\n", rp);
         fflush(stdout);
         foundServer = true;
-        char expected_protocol[100];
-        snprintf(expected_protocol, sizeof(expected_protocol),
+        char protocolRequest[100];
+        snprintf(protocolRequest, sizeof(protocolRequest),
                  "%s %s 1.1\n", pathstring, protocolstring);
-        bool foundProtocol = getServerProtocols(socketfd,
-                                                expected_protocol,
-                                                &fdset, &tv);
+        bool foundProtocol = getServerProtocols(socketfd, protocolRequest);
         if (NOT foundProtocol) {
           printf("ERROR: NO PROTOCOL FOUND (TIMEOUT)\n");
           DEBUG_FUNCTION("Failed to get a protocol from server after "
