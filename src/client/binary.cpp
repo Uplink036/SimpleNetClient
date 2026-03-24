@@ -1,6 +1,5 @@
 #include "src/client/binary.h"
 
-
 void buildProtocolRequest(calcMessage* msg) {
   msg->type = htons(22);
   msg->message = htonl(0);
@@ -20,27 +19,28 @@ void decodeCalcProtocol(calcProtocol* proto) {
   proto->inResult = ntohl(proto->inResult);
 }
 
-bool calculateBinaryTask(calcProtocol* serverProtocol, calcProtocol* clientResponse) {
-  DEBUG_FUNCTION("client::binary::calculateBinaryTask(%p, %p)\n", serverProtocol, clientResponse);
+bool calculateBinaryTask(calcProtocol* serverProtocol,
+                         calcProtocol* clientResponse) {
+  DEBUG_FUNCTION("client::binary::calculateBinaryTask(%p, %p)\n",
+                 serverProtocol, clientResponse);
   int result;
   char operation[5];
   switch (serverProtocol->arith) {
     case 1:
       result = serverProtocol->inValue1 + serverProtocol->inValue2;
-      strcpy(operation, "add");
+      snprintf(operation, sizeof(operation), "add");
       break;
     case 2:
       result = serverProtocol->inValue1 - serverProtocol->inValue2;
-      strcpy(operation, "sub");
+      snprintf(operation, sizeof(operation), "sub");
       break;
     case 3:
       result = serverProtocol->inValue1 * serverProtocol->inValue2;
-      strcpy(operation, "mul");
+      snprintf(operation, sizeof(operation), "mul");
       break;
     case 4:
-      result = round((double)serverProtocol->inValue1 /
-                     (double)serverProtocol->inValue2);
-      strcpy(operation, "div");
+      result = serverProtocol->inValue1 / serverProtocol->inValue2;
+      snprintf(operation, sizeof(operation), "div");
       break;
     default:
       printf("ERROR: UNEXPECTED OPERATION\n");

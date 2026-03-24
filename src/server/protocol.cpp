@@ -15,8 +15,7 @@ bool sendServerProtocol(int client_fd) {
       close(client_fd);
       return false;
     }
-  }
-  while (strcmp(SERVER_PROTOCOLS[protocol_index++], "\n") != 0);
+  } while (strcmp(SERVER_PROTOCOLS[protocol_index++], "\n") != 0);
   return true;
 }
 

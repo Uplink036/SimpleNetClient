@@ -2,13 +2,13 @@
 #define SRC_SERVER_SERVER_H_
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <sys/socket.h>
+#include <string.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include "src/lib/ip.h"
 #include "src/debug.h"

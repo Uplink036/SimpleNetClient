@@ -10,7 +10,7 @@ enum op stringToOp(char* input) {
     return op::MUL;
   IF_ZERO(strcmp("div", input))
     return op::DIV;
-  printf("ERROR: GOT UNEXPECTED OP COMMAND\n");
+  printf("ERROR: GOT UNEXPECTED OP COMMAND (%s)\n", input);
   DEBUG_FUNCTION("client::text::stringToOp - %s is not a defined op", input);
   exit(EXIT_FAILURE);
 }

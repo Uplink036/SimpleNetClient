@@ -1,10 +1,10 @@
 #ifndef SRC_SERVER_PROTOCOL_H_
 #define SRC_SERVER_PROTOCOL_H_
 
-#include <unistd.h>
 #include <netinet/in.h>
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "src/lib/ip.h"
 #include "src/debug.h"
 #include "src/lib/macros.h"

@@ -5,13 +5,15 @@
 #include <stdio.h>
 #include <cmath>
 #include <cstring>
+#include <cstdio>
 #include "src/debug.h"
 #include "src/lib/macros.h"
 #include "src/lib/messageProtocol.h"
 
 void buildProtocolRequest(calcMessage* msg);
 void decodeCalcProtocol(calcProtocol* proto);
-bool calculateBinaryTask(calcProtocol* serverProtocol, calcProtocol* clientResponse);
+bool calculateBinaryTask(calcProtocol* serverProtocol,
+                         calcProtocol* clientResponse);
 void encodeCalcProtocol(calcProtocol* proto);
 void decodeCalcMessage(calcMessage* msg);
 

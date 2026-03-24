@@ -2,11 +2,12 @@
 #define SRC_CLIENT_TEXT_H_
 
 #include <cmath>
+#include <cstddef>
 #include <cstring>
+#include <cstdio>
 #include "src/lib/calc.h"
 #include "src/lib/macros.h"
 #include "src/debug.h"
-#include <cstddef>
 
 enum op stringToOp(char* input);
 bool parseTextTask(char* msg, char* operation, int* valueOne, int* valueTwo);

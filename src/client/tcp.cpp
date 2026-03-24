@@ -92,7 +92,7 @@ static void getResultResponseBack(int socketfd, int result) {
 }
 
 static bool handleTextTask(int socketfd) {
-    char msg[1500];
+  char msg[1500];
   IF_NEGATIVE(getServerTask(socketfd, msg)) {
     printf("ERROR: COULD NOT SEND TASK TO SERVER (TIMEOUT)\n");
     DEBUG_FUNCTION("Could not get task from server %d\n", 0);
@@ -110,11 +110,12 @@ static bool handleTextTask(int socketfd) {
 
 static bool handleBinaryTask(int socketfd) {
   calcProtocol serverMessage;
-  ssize_t bytesReceived = recv(socketfd, &serverMessage, sizeof(calcProtocol), 0);
+  ssize_t bytesReceived = recv(socketfd, &serverMessage,
+                               sizeof(calcProtocol), 0);
   if (bytesReceived < 0) {
     printf("ERROR: COULD NOT GET BINARY TASK FROM SERVER\n");
-      DEBUG_FUNCTION("Could not get binary task from server %d\n", 0);
-      return false;
+    DEBUG_FUNCTION("Could not get binary task from server %d\n", 0);
+    return false;
   } else if (bytesReceived == 0) {
     printf("ERROR: MESSAGE LOST (TIMEOUT)\n");
     DEBUG_FUNCTION("Could not get binary task from server %d\n", 0);
@@ -125,7 +126,8 @@ static bool handleBinaryTask(int socketfd) {
   calculateBinaryTask(&serverMessage, &clientResponse);
   int result = clientResponse.inResult;
   encodeCalcProtocol(&clientResponse);
-  ssize_t bytesSent = send(socketfd, &clientResponse, sizeof(clientResponse), 0);
+  ssize_t bytesSent = send(socketfd, &clientResponse,
+                           sizeof(clientResponse), 0);
   if (bytesSent != (ssize_t)sizeof(clientResponse)) {
     printf("ERROR: COULD NOT SEND BINARY RESULT TO SERVER\n");
     return false;
@@ -134,11 +136,10 @@ static bool handleBinaryTask(int socketfd) {
   calcMessage responseMessage;
   memset(&responseMessage, 0, sizeof(responseMessage));
   bytesReceived = recv(socketfd, &responseMessage, sizeof(responseMessage), 0);
-  if (bytesReceived != (ssize_t)sizeof(responseMessage)) {
+  if (bytesReceived != static_cast<ssize_t>(sizeof(responseMessage))) {
     printf("ERROR: COULD NOT GET BINARY RESPONSE BACK FROM SERVER\n");
     return false;
-  }
-  else if (bytesReceived == 0) {
+  } else if (bytesReceived == 0) {
     printf("ERROR: MESSAGE LOST (TIMEOUT)\n");
     DEBUG_FUNCTION("Could not get binary task from server %d\n", 0);
     return false;
@@ -221,11 +222,11 @@ int connectTCP(char* destination, char* destinationPort,
           goto freeTCP;
         }
         bool handledTask = false;
-        if (strcmp(pathstring, "TEXT") == 0)
+        if (strcmp(pathstring, "TEXT") == 0) {
           handledTask = handleTextTask(socketfd);
-        else if (strcmp(pathstring, "BINARY") == 0)
+        } else if (strcmp(pathstring, "BINARY") == 0) {
           handledTask = handleBinaryTask(socketfd);
-        else {
+        } else {
           printf("ERROR: UNSUPPORTED APPLICATION PROTOCOL %s\n", pathstring);
           exitStatus = 1;
           goto freeTCP;

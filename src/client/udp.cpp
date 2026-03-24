@@ -23,7 +23,8 @@ static bool handleTextTask(int socketfd, char pathstring[7],
   char protocolRequest[100];
   snprintf(protocolRequest, sizeof(protocolRequest), "%s %s 1.1\n",
            pathstring, protocolstring);
-  ssize_t bytesSent = send(socketfd, protocolRequest, strlen(protocolRequest), 0);
+  ssize_t bytesSent = send(socketfd, protocolRequest,
+                           strlen(protocolRequest), 0);
   if (bytesSent != (ssize_t)strlen(protocolRequest)) {
     printf("ERROR: COULD NOT SEND TEXT PROTOCOL REQUEST TO SERVER\n");
     return false;
@@ -33,9 +34,10 @@ static bool handleTextTask(int socketfd, char pathstring[7],
   memset(taskMessage, 0, sizeof(taskMessage));
   if (NOT waitForRead(socketfd))
     return false;
-  ssize_t bytesReceived = recv(socketfd, taskMessage, sizeof(taskMessage)-1, 0);
+  ssize_t bytesReceived = recv(socketfd, taskMessage,
+                               sizeof(taskMessage) - 1, 0);
   if (bytesReceived <= 0) {
-    printf("ERROR: COULD NOT GET TEXT TASK FROM SERVER\n");§
+    printf("ERROR: COULD NOT GET TEXT TASK FROM SERVER\n");
     return false;
   }
   taskMessage[bytesReceived] = '\0';
@@ -71,7 +73,8 @@ static bool handleTextTask(int socketfd, char pathstring[7],
 
 
 static bool getServerProtocols(int socketfd, calcProtocol* serverMessage) {
-  DEBUG_FUNCTION("client::udp::getServerProtocols(%d, %p)\n", socketfd, serverMessage);
+  DEBUG_FUNCTION("client::udp::getServerProtocols(%d, %p)\n", socketfd,
+                 serverMessage);
   calcMessage firstMessage;
   buildProtocolRequest(&firstMessage);
   ssize_t bytesSent = send(socketfd, &firstMessage, sizeof(calcMessage), 0);
@@ -84,7 +87,8 @@ static bool getServerProtocols(int socketfd, calcProtocol* serverMessage) {
     return false;
   }
 
-  ssize_t bytesReceived = recv(socketfd, serverMessage, sizeof(calcProtocol), 0);
+  ssize_t bytesReceived = recv(socketfd, serverMessage,
+                               sizeof(calcProtocol), 0);
   if (bytesReceived < 0) {
     perror("ERROR: PROTOCOL NOT RECEIVED");
     return false;
@@ -100,12 +104,14 @@ static bool getServerProtocols(int socketfd, calcProtocol* serverMessage) {
 
 static bool calculateTask(int socketfd, calcProtocol* serverProtocol,
                           calcProtocol* clientResponse) {
-  DEBUG_FUNCTION("client::udp::calculateTask(%d, %p)\n", socketfd, serverProtocol);
+  DEBUG_FUNCTION("client::udp::calculateTask(%d, %p)\n", socketfd,
+                 serverProtocol);
   return calculateBinaryTask(serverProtocol, clientResponse);
 }
 
 static bool sendTaskResults(int socketfd, calcProtocol* clientResponse) {
-  DEBUG_FUNCTION("client::udp::sendTaskResults(%d, %p)\n", socketfd, clientResponse);
+  DEBUG_FUNCTION("client::udp::sendTaskResults(%d, %p)\n", socketfd,
+                 clientResponse);
   encodeCalcProtocol(clientResponse);
   ssize_t bytesSent = send(socketfd, clientResponse, sizeof(calcProtocol), 0);
   if (bytesSent < 0) {
@@ -116,12 +122,14 @@ static bool sendTaskResults(int socketfd, calcProtocol* clientResponse) {
 }
 
 static bool getResultResponseBack(int socketfd, int result) {
-  DEBUG_FUNCTION("client::udp::getResultResponseBack(%d, %d)\n", socketfd, result);
+  DEBUG_FUNCTION("client::udp::getResultResponseBack(%d, %d)\n", socketfd,
+                 result);
   calcMessage responseMessage;
   if (NOT waitForRead(socketfd)) {
     return false;
   }
-  ssize_t bytesReceived = recv(socketfd, &responseMessage, sizeof(calcMessage), 0);
+  ssize_t bytesReceived = recv(socketfd, &responseMessage,
+                               sizeof(calcMessage), 0);
   if (bytesReceived == (ssize_t)sizeof(calcMessage)) {
     decodeCalcMessage(&responseMessage);
     if (responseMessage.message == 1) {
@@ -149,7 +157,8 @@ static bool handleBinaryTask(int socketfd) {
   }
 
   calcProtocol clientResponse;
-  bool calculatedTask = calculateTask(socketfd, &serverMessage, &clientResponse);
+  bool calculatedTask =
+      calculateTask(socketfd, &serverMessage, &clientResponse);
   if (NOT calculatedTask) {
     printf("ERROR: NOT OK (ERROR CALCULATING TASK)\n");
     DEBUG_FUNCTION("Failed to calculate task from server\n");
@@ -174,7 +183,7 @@ static bool handleBinaryTask(int socketfd) {
 }
 
 int connectUDP(char* destination, char* destinationPort,
-                char pathstring[7], char protocolstring[6]){
+               char pathstring[7], char protocolstring[6]) {
   DEBUG_FUNCTION("client::udp::connectUDP(%s, %s, %s, %s)\n",
     destination, destinationPort, pathstring, protocolstring);
   int exitStatus = 0;
@@ -218,7 +227,8 @@ int connectUDP(char* destination, char* destinationPort,
         DEBUG_FUNCTION("Testing connection %p\n", rp);
         fflush(stdout);
         if (strcmp(pathstring, "TEXT") == 0) {
-          bool handledTask = handleTextTask(socketfd, pathstring, protocolstring);
+            bool handledTask = handleTextTask(
+              socketfd, pathstring, protocolstring);
           if (NOT handledTask) {
             exitStatus = 1;
             goto freeUDP;
